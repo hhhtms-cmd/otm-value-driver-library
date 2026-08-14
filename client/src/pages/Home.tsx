@@ -1,11 +1,12 @@
 /* Design reminder: "决策档案室" — evidence-first interactive archive; use asymmetric editorial composition and restrained vermilion highlights. */
 import { useMemo, useState } from "react";
+import RoiExportWorkspace from "@/components/RoiExportWorkspace";
 
 const MANUS_ASSET_ORIGIN = "https://otmvaldriv-n3maueuh.manus.space";
 const assetUrl = (assetPath: string) => window.location.hostname.endsWith("github.io") ? `${MANUS_ASSET_ORIGIN}${assetPath}` : assetPath;
 
 type DriverStatus = "quantified" | "pending" | "directional" | "extension";
-type Driver = {
+export type Driver = {
   id: string;
   title: string;
   english: string;
@@ -19,7 +20,7 @@ type Driver = {
   narrative: string;
 };
 
-const DRIVERS: Driver[] = [
+export const DRIVERS: Driver[] = [
   { id: "01", title: "运输规划与 Cost-to-Serve 优化", english: "Planning & Cost-to-Serve", description: "以方式、路线、服务等级与合并逻辑降低每单位运输成本。", status: "pending", statusLabel: "待量化", impact: "成本与利用率", driver: "模式 / 路径选择 · 订单合并 · 加急管控", kpis: ["每票运输成本", "装载率", "加急运费"], data: "订单、费率、路线、服务等级和历史运量", narrative: "用于说明客户是否在每次运输中作出合适的成本—服务权衡。" },
   { id: "02", title: "承运商采购、商业条款与运力管理", english: "Carrier & Capacity", description: "将竞争性运价、可靠运力与承运商履约放入同一商业控制面。", status: "pending", statusLabel: "待量化", impact: "条款与运力", driver: "电子招标 · 费率治理 · 分配合规", kpis: ["合同价差", "主承运商使用率", "接受率"], data: "合同、tender、实际运价、承运商绩效", narrative: "用于把 carrier 管理从关系管理转换为可观察的经济表现。" },
   { id: "03", title: "运输执行与作业自动化", english: "Execution & Automation", description: "减少人工触点、重复沟通与操作偏差，让团队规模随运量而不是随人头增长。", status: "pending", statusLabel: "待量化", impact: "生产率", driver: "自动建运单 · 承运商协同 · 例外工作流", kpis: ["每票处理分钟", "自动化率", "返工率"], data: "流程日志、作业量、FTE、错误与返工记录", narrative: "用于建立业务效率而非单纯系统功能的价值基线。" },
@@ -89,7 +90,7 @@ export default function Home() {
             <h1>从运输信号，走向<br /><em>可验证的</em>价值路径。</h1>
             <p className="hero-copy">把 OTM 能力、客户数据、ROI 方法和决策叙事组织成按需组装的模块库，而不是一次性的售前文档。</p>
             <div className="hero-causal-rail" aria-label="价值因果路径"><span>痛点</span><b>01</b><span>能力</span><b>02</b><span>变量</span><b>03</b><span>KPI</span><b>04</b><span>价值</span></div>
-            <div className="hero-actions"><a className="button-archive" href="#library">浏览价值领域 <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>查看当前切入点 <span>↗</span></button></div>
+            <div className="hero-actions"><a className="button-archive" href="#library">检索价值档案 <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>验证当前证据 <span>↗</span></button></div>
           </div>
           <aside className="hero-annotation"><strong>Current focus</strong>US freight audit & visibility<br />已量化的首期价值闭环</aside>
         </section>
@@ -115,6 +116,8 @@ export default function Home() {
           <div className="assessment-image"><img src={assetUrl("/manus-storage/otm-evidence-path_0f8a0592.jpg")} alt="价值证据路径的抽象档案图像" /></div>
           <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>Value Assessment 是共同诊断，不是预设结论。</h2><p>从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。</p><div className="question-list"><div className="question-row"><span>01</span><strong>运输支出是否能与合同费率和运输事件逐项匹配？</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>异常和延迟被识别时，是否还来得及采取纠正行动？</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>哪些 KPI 已有可信基线，哪些仍需作为方向性价值？</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>US 证据与 Europe 证据是否被明确隔离，避免错误外推？</strong><i>↗</i></div></div></div>
         </section>
+
+        <RoiExportWorkspace drivers={DRIVERS} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
 
         <section className="narrative-section section-wrap section-anchor" id="narrative">
           <div className="section-lead"><div><div className="eyebrow">04 / Narrative scaffold</div><h2 className="section-heading">用证据状态管理范围，而不是用全部能力堆叠范围。</h2></div><p className="section-intro">每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。</p></div>

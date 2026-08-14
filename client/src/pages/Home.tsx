@@ -1,6 +1,9 @@
 /* Design reminder: "决策档案室" — evidence-first interactive archive; use asymmetric editorial composition and restrained vermilion highlights. */
 import { useMemo, useState } from "react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import RoiExportWorkspace from "@/components/RoiExportWorkspace";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translate } from "@/lib/i18n";
 
 const MANUS_ASSET_ORIGIN = "https://otmvaldriv-n3maueuh.manus.space";
 const assetUrl = (assetPath: string) => window.location.hostname.endsWith("github.io") ? `${MANUS_ASSET_ORIGIN}${assetPath}` : assetPath;
@@ -58,75 +61,79 @@ const VIEWS = {
 function scrollToId(id: string) { document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }
 
 export default function Home() {
+  const { language } = useLanguage();
+  const t = (value: string) => translate(language, value);
   const [selectedId, setSelectedId] = useState("04");
   const [activeView, setActiveView] = useState<keyof typeof VIEWS>("internal");
-  const selected = useMemo(() => DRIVERS.find((driver) => driver.id === selectedId) ?? DRIVERS[3], [selectedId]);
+  const localizedDrivers = useMemo(() => DRIVERS.map((driver) => ({ ...driver, title: t(driver.title), description: t(driver.description), statusLabel: t(driver.statusLabel), impact: t(driver.impact), driver: t(driver.driver), kpis: driver.kpis.map(t), data: t(driver.data), narrative: t(driver.narrative) })), [language]);
+  const selected = useMemo(() => localizedDrivers.find((driver) => driver.id === selectedId) ?? localizedDrivers[3], [localizedDrivers, selectedId]);
   const view = VIEWS[activeView];
 
   const selectDriver = (id: string) => { setSelectedId(id); window.setTimeout(() => scrollToId("driver-detail"), 10); };
 
   return (
     <div className="archive-shell">
-      <div className="top-ledger"><span>OTM Value Driver Library · Framework v0.1</span><span>Evidence before assertion</span></div>
-      <aside className="sidebar-rail" aria-label="Value Driver 目录">
+      <div className="top-ledger"><span>OTM Value Driver Library · Framework v0.1</span><div className="top-ledger-tools"><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
+      <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
         <div className="brand-block">
-          <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library 标记" />
+          <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />
           <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">OTM / Decision Archive</div></div>
         </div>
         <nav className="rail-nav">
           <p className="rail-kicker">Value domains / 08</p>
-          {DRIVERS.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`nav-archive-item ${selectedId === driver.id ? "active" : ""}`}><span className="nav-index">{driver.id}</span><span className="nav-label">{driver.title.replace("与 Cost-to-Serve 优化", "")}</span><i className={`nav-dot ${driver.status}`} /></button>)}
+          {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`nav-archive-item ${selectedId === driver.id ? "active" : ""}`}><span className="nav-index">{driver.id}</span><span className="nav-label">{driver.title}</span><i className={`nav-dot ${driver.status}`} /></button>)}
         </nav>
-        <div className="rail-footer"><span>框架原则</span><p>价值主张必须可追溯到痛点、能力、经营变量、KPI 与证据状态。</p></div>
+        <div className="rail-footer"><span>{t("框架原则")}</span><p>{t("价值主张必须可追溯到痛点、能力、经营变量、KPI 与证据状态。")}</p></div>
       </aside>
 
       <main className="page-main">
         <section className="hero" id="overview">
-          <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="抽象物流价值链档案视觉" />
+          <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="Abstract transportation value evidence archive" />
           <div className="hero-grid" />
           <div className="hero-dossier-frame" aria-hidden="true"><span>FILE / OTM-VDL-01</span><span>DECISION DOSSIER</span><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /></div>
+          <div className="hero-evidence-stamp" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>EVIDENCE<br />FILED</span><b>01</b></div>
           <div className="hero-margin-file" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>CASE FILE</span><b>01</b><i>US / Audit + Visibility</i></div>
           <div className="hero-content">
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
             <div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div>
-            <h1>从运输信号，建立<br /><em>可验证的</em>价值档案。</h1>
-            <p className="hero-copy">以 OTM 能力、客户数据、ROI 方法和决策叙事构成一条有证据、可回溯、可组装的价值路径。</p>
-            <div className="hero-causal-rail" aria-label="价值因果路径"><span>痛点</span><b>01</b><span>能力</span><b>02</b><span>变量</span><b>03</b><span>KPI</span><b>04</b><span>价值</span></div>
-            <div className="hero-actions"><a className="button-archive" href="#library">检索价值档案 <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>验证当前证据 <span>↗</span></button></div>
+            <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
+            <p className="hero-copy">{t("以 OTM 能力、客户数据、ROI 方法和决策叙事构成一条有证据、可回溯、可组装的价值路径。")}</p>
+            <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>
+            <div className="hero-actions"><a className="button-archive" href="#library">{t("检索价值档案")} <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>{t("验证当前证据")} <span>↗</span></button></div>
           </div>
-          <aside className="hero-annotation"><strong>Current focus</strong>US freight audit & visibility<br />已量化的首期价值闭环</aside>
+          <aside className="hero-annotation"><strong>Current focus</strong>US freight audit & visibility<br />{t("已量化的首期价值闭环")}</aside>
         </section>
 
         <section className="section-wrap section-anchor" id="library">
-          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / Value map</div><h2 className="section-heading">八个领域，一张可以复用的价值地图。</h2></div><div className="value-map-intro"><p className="section-intro">一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。</p><div className="evidence-legend" aria-label="证据状态说明"><span className="quantified">已量化</span><span className="pending">待量化</span><span className="directional">方向性</span><span className="extension">可选扩展</span></div></div></div>
-          <div className="value-map" aria-label="OTM 价值领域列表">
-            {DRIVERS.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`value-row ${driver.status} ${selectedId === driver.id ? "selected" : ""}`} aria-pressed={selectedId === driver.id}><span className="value-number">{driver.id}</span><div className="value-title">{driver.title}<span>{driver.english}</span></div><div className="value-description">{driver.description}</div><span className={`status-label ${driver.status}`}><b />{driver.statusLabel}</span><span className="row-arrow">→</span></button>)}
+          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / Value map</div><h2 className="section-heading">{t("八个领域，一张可以复用的价值地图。")}</h2></div><div className="value-map-intro"><p className="section-intro">{t("一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。")}</p><div className="evidence-legend" aria-label="Evidence status"><span className="quantified">{t("已量化")}</span><span className="pending">{t("待量化")}</span><span className="directional">{t("方向性")}</span><span className="extension">{t("可选扩展")}</span></div></div></div>
+          <div className="value-map" aria-label="OTM value domains">
+            {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`value-row ${driver.status} ${selectedId === driver.id ? "selected" : ""}`} aria-pressed={selectedId === driver.id}><span className="value-number">{driver.id}</span><div className="value-title">{driver.title}<span>{driver.english}</span></div><div className="value-description">{driver.description}</div><span className={`status-label ${driver.status}`}><b />{driver.statusLabel}</span><span className="row-arrow">→</span></button>)}
           </div>
           <article className="detail-drawer" id="driver-detail" aria-live="polite">
-            <div><div className="detail-kicker">Selected driver / {selected.id} · {selected.statusLabel}</div><h3>{selected.title}</h3><p>{selected.narrative}</p><div className="path-line"><span className="path-step"><b>01</b>客户痛点</span><span className="path-step"><b>02</b>OTM 能力</span><span className="path-step"><b>03</b>经营变量</span><span className="path-step"><b>04</b>KPI</span><span className="path-step"><b>05</b>价值判断</span></div></div>
+            <div><div className="detail-kicker">Selected driver / {selected.id} · {selected.statusLabel}</div><h3>{selected.title}</h3><p>{selected.narrative}</p><div className="path-line"><span className="path-step"><b>01</b>{t("客户痛点")}</span><span className="path-step"><b>02</b>{t("OTM 能力")}</span><span className="path-step"><b>03</b>{t("经营变量")}</span><span className="path-step"><b>04</b>KPI</span><span className="path-step"><b>05</b>{t("价值判断")}</span></div></div>
             <div className="detail-aside"><h4>Evidence register</h4><div className="mini-metric"><span>Value</span><strong>{selected.impact}</strong></div><div className="mini-metric"><span>Drivers</span><strong>{selected.driver}</strong></div><div className="mini-metric"><span>KPIs</span><strong>{selected.kpis.join(" · ")}</strong></div><div className="mini-metric"><span>Data</span><strong>{selected.data}</strong></div></div>
           </article>
         </section>
 
         <section className="view-section section-wrap section-anchor" id="views">
-          <div className="view-layout"><div className="view-statement"><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />02 / Same evidence, different view</div><h2>一次维护，三种决策视图。</h2><p>不从头建立客户版与内部版。每张 driver 卡都是唯一事实源，只按读者改变展示深度。</p><div className="view-toggle">{(Object.keys(VIEWS) as Array<keyof typeof VIEWS>).map((key) => <button key={key} onClick={() => setActiveView(key)} className={activeView === key ? "active" : ""}>{VIEWS[key].label}</button>)}</div></div>
-            <article className="view-card"><div className="view-card-head"><span>{view.code}</span><span>{view.label}</span></div><div className="view-card-body"><h3>{view.title}</h3><p>{view.copy}</p><div className="evidence-list">{view.items.map(([title, description, status]) => <div className={`evidence-item ${status}`} key={title}><i /><div><strong>{title}</strong><span>{description}</span></div></div>)}</div></div></article>
+          <div className="view-layout"><div className="view-statement"><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />02 / Same evidence, different view</div><h2>{t("一次维护，三种决策视图。")}</h2><p>{t("不从头建立客户版与内部版。每张 driver 卡都是唯一事实源，只按读者改变展示深度。")}</p><div className="view-toggle">{(Object.keys(VIEWS) as Array<keyof typeof VIEWS>).map((key) => <button key={key} onClick={() => setActiveView(key)} className={activeView === key ? "active" : ""}>{t(VIEWS[key].label)}</button>)}</div></div>
+            <article className="view-card"><div className="view-card-head"><span>{view.code}</span><span>{t(view.label)}</span></div><div className="view-card-body"><h3>{t(view.title)}</h3><p>{t(view.copy)}</p><div className="evidence-list">{view.items.map(([title, description, status]) => <div className={`evidence-item ${status}`} key={title}><i /><div><strong>{t(title)}</strong><span>{t(description)}</span></div></div>)}</div></div></article>
           </div>
         </section>
 
         <section className="assessment-grid section-anchor" id="assessment">
-          <div className="assessment-image"><img src={assetUrl("/manus-storage/otm-evidence-path_0f8a0592.jpg")} alt="价值证据路径的抽象档案图像" /></div>
-          <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>Value Assessment 是共同诊断，不是预设结论。</h2><p>从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。</p><div className="question-list"><div className="question-row"><span>01</span><strong>运输支出是否能与合同费率和运输事件逐项匹配？</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>异常和延迟被识别时，是否还来得及采取纠正行动？</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>哪些 KPI 已有可信基线，哪些仍需作为方向性价值？</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>US 证据与 Europe 证据是否被明确隔离，避免错误外推？</strong><i>↗</i></div></div></div>
+          <div className="assessment-image"><img src={assetUrl("/manus-storage/otm-evidence-path_0f8a0592.jpg")} alt="Abstract value evidence path" /></div>
+          <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>{t("Value Assessment 是共同诊断，不是预设结论。")}</h2><p>{t("从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。")}</p><div className="question-list"><div className="question-row"><span>01</span><strong>{t("运输支出是否能与合同费率和运输事件逐项匹配？")}</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>{t("异常和延迟被识别时，是否还来得及采取纠正行动？")}</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>{t("哪些 KPI 已有可信基线，哪些仍需作为方向性价值？")}</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>{t("US 证据与 Europe 证据是否被明确隔离，避免错误外推？")}</strong><i>↗</i></div></div></div>
         </section>
 
-        <RoiExportWorkspace drivers={DRIVERS} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
+        <RoiExportWorkspace drivers={localizedDrivers} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
 
         <section className="narrative-section section-wrap section-anchor" id="narrative">
-          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />04 / Narrative scaffold</div><h2 className="section-heading">用证据状态管理范围，而不是用全部能力堆叠范围。</h2></div><p className="section-intro">每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。</p></div>
-          <div className="narrative-grid"><div className="narrative-steps"><div className="narrative-step"><span className="step-number">LAYER / 1</span><div><h3>已验证的核心价值</h3><p>US freight audit 与 visibility 的直接价值闭环；使用基线、范围、去重规则和敏感性表达。</p></div><span className="step-tag">Hard ROI</span></div><div className="narrative-step"><span className="step-number">LAYER / 2</span><div><h3>有证据、待量化的扩展价值</h3><p>Europe 的相同 driver 或相邻机会；说明诊断和验证计划，不承诺具体金额。</p></div><span className="step-tag">Validate</span></div><div className="narrative-step"><span className="step-number">LAYER / 3</span><div><h3>战略路线图选项</h3><p>网络建模、车队、可持续性或更广 Oracle 能力；保留给独立的范围确认和商业案例。</p></div><span className="step-tag">Roadmap</span></div></div><div className="narrative-art"><img src={assetUrl("/manus-storage/otm-narrative-layers_d2d229db.jpg")} alt="分层商业案例叙事的抽象档案视觉" /></div></div>
+          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />04 / Narrative scaffold</div><h2 className="section-heading">{t("用证据状态管理范围，而不是用全部能力堆叠范围。")}</h2></div><p className="section-intro">{t("每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。")}</p></div>
+          <div className="narrative-grid"><div className="narrative-steps"><div className="narrative-file-strip"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>CASE FILE / SCOPE CONTROL</span><b>04</b></div><div className="narrative-step"><span className="step-number">LAYER / 1</span><div><h3>{t("已验证的核心价值")}</h3><p>{t("US freight audit 与 visibility 的直接价值闭环；使用基线、范围、去重规则和敏感性表达。")}</p></div><span className="step-tag">Hard ROI</span></div><div className="narrative-step"><span className="step-number">LAYER / 2</span><div><h3>{t("有证据、待量化的扩展价值")}</h3><p>{t("Europe 的相同 driver 或相邻机会；说明诊断和验证计划，不承诺具体金额。")}</p></div><span className="step-tag">Validate</span></div><div className="narrative-step"><span className="step-number">LAYER / 3</span><div><h3>{t("战略路线图选项")}</h3><p>{t("网络建模、车队、可持续性或更广 Oracle 能力；保留给独立的范围确认和商业案例。")}</p></div><span className="step-tag">Roadmap</span></div></div><div className="narrative-art"><img src={assetUrl("/manus-storage/otm-narrative-layers_d2d229db.jpg")} alt="Abstract layered business-case narrative" /></div></div>
         </section>
 
-        <footer className="footer-strip"><h2>先确认数据成熟度，再进入 ROI 计算。</h2><div className="footer-note"><b>Operational principle</b>OTM Value Driver Library 将每个价值主张锚定到痛点、能力、经营变量、KPI 与可审计的证据状态。</div></footer>
+        <footer className="footer-strip"><h2>{t("先确认数据成熟度，再进入 ROI 计算。")}</h2><div className="footer-note"><b>Operational principle</b>{t("OTM Value Driver Library 将每个价值主张锚定到痛点、能力、经营变量、KPI 与可审计的证据状态。")}</div></footer>
       </main>
     </div>
   );

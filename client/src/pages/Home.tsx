@@ -1,6 +1,9 @@
 /* Design reminder: "决策档案室" — evidence-first interactive archive; use asymmetric editorial composition and restrained vermilion highlights. */
 import { useMemo, useState } from "react";
 
+const MANUS_ASSET_ORIGIN = "https://otmvaldriv-n3maueuh.manus.space";
+const assetUrl = (assetPath: string) => window.location.hostname.endsWith("github.io") ? `${MANUS_ASSET_ORIGIN}${assetPath}` : assetPath;
+
 type DriverStatus = "quantified" | "pending" | "directional" | "extension";
 type Driver = {
   id: string;
@@ -66,7 +69,7 @@ export default function Home() {
       <div className="top-ledger"><span>OTM Value Driver Library · Framework v0.1</span><span>Evidence before assertion</span></div>
       <aside className="sidebar-rail" aria-label="Value Driver 目录">
         <div className="brand-block">
-          <img className="brand-mark" src="/manus-storage/otm-evidence-mark_3295b18f.png" alt="Value Driver Library 标记" />
+          <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library 标记" />
           <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">OTM / Decision Archive</div></div>
         </div>
         <nav className="rail-nav">
@@ -78,9 +81,9 @@ export default function Home() {
 
       <main className="page-main">
         <section className="hero" id="overview">
-          <img className="hero-image" src="/manus-storage/otm-archive-hero_347dc198.jpg" alt="抽象物流价值链档案视觉" />
+          <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="抽象物流价值链档案视觉" />
           <div className="hero-grid" />
-          <div className="hero-dossier-frame" aria-hidden="true"><span>FILE / OTM-VDL-01</span><span>DECISION DOSSIER</span><img src="/manus-storage/otm-evidence-mark_3295b18f.png" alt="" /></div>
+          <div className="hero-dossier-frame" aria-hidden="true"><span>FILE / OTM-VDL-01</span><span>DECISION DOSSIER</span><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /></div>
           <div className="hero-content">
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
             <h1>从运输信号，走向<br /><em>可验证的</em>价值路径。</h1>
@@ -109,13 +112,13 @@ export default function Home() {
         </section>
 
         <section className="assessment-grid section-anchor" id="assessment">
-          <div className="assessment-image"><img src="/manus-storage/otm-evidence-path_0f8a0592.jpg" alt="价值证据路径的抽象档案图像" /></div>
+          <div className="assessment-image"><img src={assetUrl("/manus-storage/otm-evidence-path_0f8a0592.jpg")} alt="价值证据路径的抽象档案图像" /></div>
           <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>Value Assessment 是共同诊断，不是预设结论。</h2><p>从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。</p><div className="question-list"><div className="question-row"><span>01</span><strong>运输支出是否能与合同费率和运输事件逐项匹配？</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>异常和延迟被识别时，是否还来得及采取纠正行动？</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>哪些 KPI 已有可信基线，哪些仍需作为方向性价值？</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>US 证据与 Europe 证据是否被明确隔离，避免错误外推？</strong><i>↗</i></div></div></div>
         </section>
 
         <section className="narrative-section section-wrap section-anchor" id="narrative">
           <div className="section-lead"><div><div className="eyebrow">04 / Narrative scaffold</div><h2 className="section-heading">用证据状态管理范围，而不是用全部能力堆叠范围。</h2></div><p className="section-intro">每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。</p></div>
-          <div className="narrative-grid"><div className="narrative-steps"><div className="narrative-step"><span className="step-number">LAYER / 1</span><div><h3>已验证的核心价值</h3><p>US freight audit 与 visibility 的直接价值闭环；使用基线、范围、去重规则和敏感性表达。</p></div><span className="step-tag">Hard ROI</span></div><div className="narrative-step"><span className="step-number">LAYER / 2</span><div><h3>有证据、待量化的扩展价值</h3><p>Europe 的相同 driver 或相邻机会；说明诊断和验证计划，不承诺具体金额。</p></div><span className="step-tag">Validate</span></div><div className="narrative-step"><span className="step-number">LAYER / 3</span><div><h3>战略路线图选项</h3><p>网络建模、车队、可持续性或更广 Oracle 能力；保留给独立的范围确认和商业案例。</p></div><span className="step-tag">Roadmap</span></div></div><div className="narrative-art"><img src="/manus-storage/otm-narrative-layers_d2d229db.jpg" alt="分层商业案例叙事的抽象档案视觉" /></div></div>
+          <div className="narrative-grid"><div className="narrative-steps"><div className="narrative-step"><span className="step-number">LAYER / 1</span><div><h3>已验证的核心价值</h3><p>US freight audit 与 visibility 的直接价值闭环；使用基线、范围、去重规则和敏感性表达。</p></div><span className="step-tag">Hard ROI</span></div><div className="narrative-step"><span className="step-number">LAYER / 2</span><div><h3>有证据、待量化的扩展价值</h3><p>Europe 的相同 driver 或相邻机会；说明诊断和验证计划，不承诺具体金额。</p></div><span className="step-tag">Validate</span></div><div className="narrative-step"><span className="step-number">LAYER / 3</span><div><h3>战略路线图选项</h3><p>网络建模、车队、可持续性或更广 Oracle 能力；保留给独立的范围确认和商业案例。</p></div><span className="step-tag">Roadmap</span></div></div><div className="narrative-art"><img src={assetUrl("/manus-storage/otm-narrative-layers_d2d229db.jpg")} alt="分层商业案例叙事的抽象档案视觉" /></div></div>
         </section>
 
         <footer className="footer-strip"><h2>先确认数据成熟度，再进入 ROI 计算。</h2><div className="footer-note"><b>Operational principle</b>OTM Value Driver Library 将每个价值主张锚定到痛点、能力、经营变量、KPI 与可审计的证据状态。</div></footer>

@@ -33,3 +33,19 @@
 - [x] 形成可复用 One Oracle 评估与估值方法论的改进建议。
 - [x] 将 GTM 价值域、数据假设和 ROI 计算加入互动仪表板。
 - [x] 验证 GTM/OTM 联动、三语文案与 PDF/Excel 导出兼容性。
+- [x] 确定英文业务案例 PPT 与 ROI 模型的保留结构和更新范围。
+- [x] 设计五年 OTM/GTM 价值、TCO、实现率、情景与去重模型结构。
+- [x] 生成公式可追溯的英文 Excel ROI 工作簿。
+- [x] 生成英文 One Oracle OTM/GTM Business Case PPT。
+- [x] 审阅 Excel 公式、PPT 内容与文件可用性后交付。
+- [x] 盘点 Copilot OTM 工作簿的工作表、输入区、公式与审阅控件。
+- [x] 对比其价值驱动、证据口径、情景逻辑和计算治理与现有 One Oracle 模型的差异。
+- [x] 形成可采纳设计、需修正点与不建议沿用项的审阅结论。
+- [x] 审阅 Copilot 对 Discovery Library 与 ROI Financial Engine 的产品定位。
+- [x] 对照两份工作簿，验证 Discovery、客户协作、ROI 与高管输出的分层关系。
+- [x] 定义现有 One Oracle OTM/GTM 框架应采纳的分层架构与实施优先级。
+- [x] 编写 Discovery → Customer Collaboration → ROI → Executive Output 的具体映射规范。
+- [x] 在 Dashboard 增加 Assessment Workflow、Visibility Discovery 与 Evidence Gate 控制。
+- [x] 将客户协作字段与 ROI 工作区输入建立可追溯映射。
+- [x] 更新 Excel 模型，加入 Discovery、Evidence Register、E2/E3 硬门控与输出链路。
+- [x] 验证 Dashboard/Excel 的分层衔接、公式控制和交付文件质量。

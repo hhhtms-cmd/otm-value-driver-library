@@ -4,11 +4,13 @@ import { jsPDF } from "jspdf";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import { isHardRoiGate, type EvidenceGate } from "@/lib/evidence";
 import type { Driver } from "@/lib/oneOracleDrivers";
+import "./layered-workflow.css";
 
 type DriverOption = Pick<Driver, "id" | "family" | "title" | "english" | "status" | "statusLabel" | "impact" | "kpis" | "formula">;
 
-type RoiExportWorkspaceProps = { drivers: DriverOption[]; brandMarkSrc: string };
+type RoiExportWorkspaceProps = { drivers: DriverOption[]; evidenceGates: Record<string, EvidenceGate>; onEvidenceGateChange: (driverId: string, gate: EvidenceGate) => void; brandMarkSrc: string };
 
 type ImportReport = {
   filename: string;
@@ -26,6 +28,7 @@ type RoiScenario = {
   driverValues: Record<string, number>;
   implementationCost: number;
   annualRunCost: number;
+  evidenceGates?: Record<string, EvidenceGate>;
 };
 
 const today = () => new Intl.DateTimeFormat("en-CA").format(new Date());
@@ -39,6 +42,11 @@ const numericValue = (value: unknown) => {
 };
 const fieldKey = (row: Record<string, unknown>, aliases: string[]) => Object.keys(row).find((key) => aliases.some((alias) => normalizeText(key) === normalizeText(alias)));
 const SCENARIO_STORAGE_KEY = "otm-value-driver-library.roi-scenarios.v1";
+const LAYER_COPY: Record<Language, { baseBenefit: string; opportunityBenefit: string; baseRoi: string; notReady: string; included: string; excluded: string; selectedCopy: string; disclaimer: string }> = {
+  zh: { baseBenefit: "Base ROI 合格价值", opportunityBenefit: "待验证机会价值", baseRoi: "Base 首年 ROI", notReady: "证据不足，ROI 未就绪", included: "进入 Base ROI", excluded: "仅机会范围", selectedCopy: "E2/E3 driver 计入 Base ROI；E0/E1 仅作为机会范围。", disclaimer: "此工具将 E0/E1 保留为机会范围，仅将 E2/E3 计入 Base ROI。对外承诺前仍须确认范围、币种、TCO 与去重归属。" },
+  en: { baseBenefit: "Base ROI eligible benefit", opportunityBenefit: "Evidence-pending opportunity", baseRoi: "Base first-year ROI", notReady: "Evidence gate pending", included: "Base ROI included", excluded: "Opportunity only", selectedCopy: "Only E2/E3 drivers enter Base ROI; E0/E1 remain opportunity-only.", disclaimer: "This workspace keeps E0/E1 in the opportunity range and includes only E2/E3 in Base ROI. Confirm scope, currency, TCO, and overlap ownership before external commitment." },
+  es: { baseBenefit: "Beneficio elegible para ROI base", opportunityBenefit: "Oportunidad pendiente de evidencia", baseRoi: "ROI base del primer año", notReady: "Puerta de evidencia pendiente", included: "Incluido en ROI base", excluded: "Solo oportunidad", selectedCopy: "Solo drivers E2/E3 entran en ROI base; E0/E1 permanecen solo como oportunidad.", disclaimer: "Este espacio mantiene E0/E1 en el rango de oportunidad e incluye solo E2/E3 en ROI base. Confirme alcance, moneda, TCO y propiedad de solapamiento antes de un compromiso externo." },
+};
 const readStoredScenarios = (): RoiScenario[] => {
   if (typeof window === "undefined") return [];
   try {
@@ -53,9 +61,10 @@ const ROI_COPY: Record<Language, Record<string, string>> = {
   es: { title: "Convierta la evidencia seleccionada en un caso de negocio descargable.", intro: "Seleccione drivers OTM/GTM e introduzca supuestos de valor anual y coste. El espacio calcula ROI y recuperación del primer año, y genera un resumen PDF o Excel.", importTitle: "Importe una línea base Excel del cliente y haga que los supuestos encajen.", importCopy: "El archivo se lee solo en este navegador; nunca se carga ni se guarda en un servidor. Use la plantilla cuando sea posible; también se reconocen campos estándar de libros exportados previamente.", choose: "Elegir Excel del cliente", template: "Descargar plantilla vacía", review: "Revisión de importación", prefilled: "drivers precargados", scenarioTitle: "Guarde la línea base actual como escenario y revise los supuestos de valor en paralelo.", scenarioCopy: "Los escenarios permanecen solo en este navegador. Incluyen drivers seleccionados, valores anuales y costes de implementación/operación; el archivo original no cambia.", scenarioName: "Nombre del escenario", placeholder: "p. ej., línea base de auditoría + honorarios GTM en EE. UU.", new: "Guardar como escenario nuevo", update: "Actualizar escenario actual", save: "Guardar escenario actual", register: "Registro de escenarios guardados", saved: "Guardado", current: "Actual", benefit: "Beneficio anual", roi: "ROI del primer año", payback: "Recuperación", firstYear: "Beneficio neto del primer año", drivers: "drivers", load: "Cargar", delete: "Eliminar", empty: "Después de importar o editar supuestos, nombre y guarde la línea base para crear aquí una comparación ROI en paralelo.", select: "Seleccionar drivers de valor", selectCopy: "Solo los drivers seleccionados entran en cálculos y exportaciones. Los valores son ilustrativos hasta reemplazarlos con datos del cliente.", annualValue: "Valor anual / USD", calculation: "Resumen de cálculo ROI", implementation: "Coste único de implementación", runCost: "Coste operativo anual", gross: "Beneficio bruto anual", selectedBenefit: "de valores anuales de drivers seleccionados", noPayback: "Sin recuperación positiva", netAnnual: "usando beneficio neto anual", formula: "(Beneficio anual − coste operativo anual − coste de implementación) ÷ coste de implementación", pdf: "Descargar resumen de decisión", excel: "Descargar libro editable", note: "Nota importante", disclaimer: "Esta salida se basa en supuestos de valor anual y coste introducidos por el usuario. Es apta para un borrador de caso de negocio; confirme calidad de datos, alcance, moneda y deduplicación antes de comprometer un ROI externo.", selectLabel: "Seleccionar evidencia", calculateLabel: "Calcular valor", importLabel: "Importar línea base", compareLabel: "Guardar y comparar", months: "meses", otm: "Transporte OTM", gtm: "Comercio GTM", formulaFamily: "Familia de fórmulas", overlap: "Control de solapamiento OTM/GTM", overlapRisk: "Retraso documental, respuesta a excepciones o coste urgente pueden contarse dos veces. Asigne un propietario antes de exportar." },
 };
 
-export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportWorkspaceProps) {
+export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceGateChange, brandMarkSrc }: RoiExportWorkspaceProps) {
   const { language } = useLanguage();
   const c = ROI_COPY[language];
+  const layer = LAYER_COPY[language];
   const locale = language === "zh" ? "zh-CN" : language === "es" ? "es-ES" : "en-US";
   const currency = useMemo(() => new Intl.NumberFormat(locale, { style: "currency", currency: "USD", maximumFractionDigits: 0 }), [locale]);
   const number = useMemo(() => new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }), [locale]);
@@ -73,21 +82,25 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedDrivers = useMemo(() => drivers.filter((driver) => selectedIds.includes(driver.id)), [drivers, selectedIds]);
+  const baseDrivers = useMemo(() => selectedDrivers.filter((driver) => isHardRoiGate(evidenceGates[driver.id])), [selectedDrivers, evidenceGates]);
   const selectedByFamily = useMemo(() => ({ OTM: selectedDrivers.filter((driver) => driver.family === "OTM"), GTM: selectedDrivers.filter((driver) => driver.family === "GTM") }), [selectedDrivers]);
   const potentialOverlap = selectedIds.includes("05") && selectedIds.includes("GTM-02");
   const totalBenefit = useMemo(() => selectedDrivers.reduce((total, driver) => total + safeValue(driverValues[driver.id] ?? 0), 0), [driverValues, selectedDrivers]);
-  const netAnnualBenefit = totalBenefit - safeValue(annualRunCost);
-  const firstYearNetBenefit = totalBenefit - safeValue(implementationCost) - safeValue(annualRunCost);
-  const roi = implementationCost > 0 ? (firstYearNetBenefit / implementationCost) * 100 : 0;
-  const paybackMonths = netAnnualBenefit > 0 ? (implementationCost / netAnnualBenefit) * 12 : null;
+  const baseBenefit = useMemo(() => baseDrivers.reduce((total, driver) => total + safeValue(driverValues[driver.id] ?? 0), 0), [baseDrivers, driverValues]);
+  const opportunityBenefit = totalBenefit - baseBenefit;
+  const baseNetAnnualBenefit = baseBenefit - safeValue(annualRunCost);
+  const firstYearNetBenefit = baseBenefit - safeValue(implementationCost) - safeValue(annualRunCost);
+  const roi = implementationCost > 0 && baseDrivers.length > 0 ? (firstYearNetBenefit / implementationCost) * 100 : null;
+  const paybackMonths = baseNetAnnualBenefit > 0 ? (implementationCost / baseNetAnnualBenefit) * 12 : null;
   const date = today();
   const activeScenario = scenarios.find((scenario) => scenario.id === activeScenarioId) ?? null;
   const scenarioComparison = useMemo(() => scenarios.map((scenario) => {
-    const benefit = scenario.selectedIds.reduce((total, id) => total + safeValue(scenario.driverValues[id] ?? 0), 0);
+    const gates = scenario.evidenceGates ?? evidenceGates;
+    const benefit = scenario.selectedIds.filter((id) => isHardRoiGate(gates[id])).reduce((total, id) => total + safeValue(scenario.driverValues[id] ?? 0), 0);
     const netBenefit = benefit - safeValue(scenario.annualRunCost);
     const firstYear = benefit - safeValue(scenario.implementationCost) - safeValue(scenario.annualRunCost);
     return { scenario, benefit, firstYear, roi: scenario.implementationCost > 0 ? (firstYear / scenario.implementationCost) * 100 : 0, payback: netBenefit > 0 ? (scenario.implementationCost / netBenefit) * 12 : null };
-  }), [scenarios]);
+  }), [scenarios, evidenceGates]);
 
   useEffect(() => {
     try { window.localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(scenarios)); } catch { /* The workspace remains usable when local storage is unavailable. */ }
@@ -107,7 +120,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const saveScenario = () => {
     const name = scenarioName.trim() || `未命名情景 ${scenarios.length + 1}`;
     const now = new Date().toISOString();
-    const snapshot: RoiScenario = { id: activeScenarioId ?? `scenario-${Date.now().toString(36)}`, name, savedAt: now, selectedIds: selectedIds.slice(), driverValues: { ...driverValues }, implementationCost: safeValue(implementationCost), annualRunCost: safeValue(annualRunCost) };
+    const snapshot: RoiScenario = { id: activeScenarioId ?? `scenario-${Date.now().toString(36)}`, name, savedAt: now, selectedIds: selectedIds.slice(), driverValues: { ...driverValues }, implementationCost: safeValue(implementationCost), annualRunCost: safeValue(annualRunCost), evidenceGates: { ...evidenceGates } };
     const isUpdate = Boolean(activeScenarioId && scenarios.some((scenario) => scenario.id === activeScenarioId));
     setScenarios((current) => isUpdate ? current.map((scenario) => scenario.id === snapshot.id ? snapshot : scenario) : current.concat(snapshot));
     setActiveScenarioId(snapshot.id);
@@ -120,6 +133,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
     setDriverValues({ ...scenario.driverValues });
     setImplementationCost(safeValue(scenario.implementationCost));
     setAnnualRunCost(safeValue(scenario.annualRunCost));
+    Object.entries(scenario.evidenceGates ?? {}).forEach(([driverId, gate]) => onEvidenceGateChange(driverId, gate));
     setScenarioName(scenario.name);
     setActiveScenarioId(scenario.id);
     updateMessage(`已载入“${scenario.name}”。ROI 工作区与后续导出将使用该情景。`);
@@ -144,6 +158,12 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
       "Capability Family": driver.family,
       "Value Driver": driver.title,
       "ROI Formula Family": driver.formula,
+      "Evidence Gate": evidenceGates[driver.id] ?? "E0",
+      "Source": "",
+      "Owner": "",
+      "Period": "",
+      "Scope": "",
+      "Collection Status": "Not started",
       "Annual Benefit (USD)": "",
       "Evidence Notes": "",
     }));
@@ -173,6 +193,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
         rows: XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" }),
       }));
       const importedValues: Record<string, number> = {};
+      const importedGates: Record<string, EvidenceGate> = {};
       const matchedDriverIds: string[] = [];
       const warnings: string[] = [];
       let unmatchedRows = 0;
@@ -184,12 +205,15 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
         const idKey = fieldKey(rows[0], ["Driver ID", "Value Driver ID", "价值驱动编号", "驱动因素编号"]);
         const nameKey = fieldKey(rows[0], ["Value Driver", "Driver Name", "价值驱动因素", "价值驱动名称"]);
         const benefitKey = fieldKey(rows[0], ["Annual Benefit (USD)", "Annual Benefit", "Annual Value", "年度价值", "年度价值（USD）"]);
+        const gateKey = fieldKey(rows[0], ["Evidence Gate", "Evidence", "证据门槛", "证据状态"]);
         if (benefitKey && (idKey || nameKey)) {
           rows.forEach((row) => {
             const id = String(idKey ? row[idKey] : "").padStart(2, "0");
             const name = String(nameKey ? row[nameKey] : "");
             const driver = drivers.find((item) => item.id === id) ?? drivers.find((item) => normalizeText(item.title) === normalizeText(name) || normalizeText(item.english) === normalizeText(name));
             const value = numericValue(row[benefitKey]);
+            const importedGate = String(gateKey ? row[gateKey] : "").toUpperCase();
+            if (driver && ["E0", "E1", "E2", "E3"].includes(importedGate)) importedGates[driver.id] = importedGate as EvidenceGate;
             if (driver && value !== null) { importedValues[driver.id] = safeValue(value); matchedDriverIds.push(driver.id); }
             else if (value !== null) unmatchedRows += 1;
           });
@@ -216,6 +240,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
         setDriverValues((current) => ({ ...current, ...importedValues }));
         setSelectedIds((current) => Array.from(new Set(current.concat(uniqueMatchedIds))));
       }
+      Object.entries(importedGates).forEach(([driverId, gate]) => onEvidenceGateChange(driverId, gate));
       if (uniqueMatchedIds.length || updatedCosts.length) { setScenarioName(file.name.replace(/\.(xlsx|xls|csv)$/i, "")); setActiveScenarioId(null); }
       if (!uniqueMatchedIds.length && !updatedCosts.length) warnings.push("没有找到可识别的 Driver ID / Value Driver 或成本假设列。请使用下载的模板，或检查列名。 ");
       if (unmatchedRows) warnings.push(`${unmatchedRows} 行年度价值没有匹配到当前 Value Driver，未被写入。`);
@@ -235,16 +260,19 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
       ["One Oracle Value Driver Library — ROI Summary"],
       ["Report date", date],
       ["Selected drivers", selectedDrivers.length],
+      ["Base ROI eligible drivers (E2/E3)", baseDrivers.length],
       ["OTM drivers", selectedByFamily.OTM.length],
       ["GTM drivers", selectedByFamily.GTM.length],
       [],
       ["Metric", "Value (USD / %)"],
-      ["Annual gross benefit", totalBenefit],
+      ["Selected opportunity benefit", totalBenefit],
+      ["Base ROI eligible benefit", baseBenefit],
+      ["E0/E1 opportunity-only benefit", opportunityBenefit],
       ["Annual operating cost", annualRunCost],
       ["One-time implementation cost", implementationCost],
-      ["Annual net benefit", netAnnualBenefit],
+      ["Base annual net benefit", baseNetAnnualBenefit],
       ["First-year net benefit", firstYearNetBenefit],
-      ["First-year ROI", roi / 100],
+      ["First-year Base ROI", roi === null ? "TBD — evidence gate" : roi / 100],
       ["Payback period (months)", paybackMonths ?? "Not reached"],
     ];
     const driverRows = selectedDrivers.map((driver) => ({
@@ -256,6 +284,8 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
       "Value Path": driver.impact,
       "Primary KPIs": driver.kpis.join(" / "),
       "ROI Formula Family": driver.formula,
+      "Evidence Gate": evidenceGates[driver.id] ?? "E0",
+      "Base ROI Inclusion": isHardRoiGate(evidenceGates[driver.id]) ? "INCLUDE" : "OPPORTUNITY ONLY",
       "Annual Benefit (USD)": safeValue(driverValues[driver.id] ?? 0),
     }));
     const assumptionRows = [
@@ -266,7 +296,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
     const workbook = XLSX.utils.book_new();
     const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
     summarySheet["!cols"] = [{ wch: 32 }, { wch: 44 }];
-    summarySheet["B13"].z = "0.0%";
+    summarySheet["B16"].z = "0.0%";
     const driversSheet = XLSX.utils.json_to_sheet(driverRows);
     driversSheet["!cols"] = [{ wch: 12 }, { wch: 18 }, { wch: 38 }, { wch: 34 }, { wch: 15 }, { wch: 18 }, { wch: 35 }, { wch: 48 }, { wch: 22 }];
     const assumptionsSheet = XLSX.utils.json_to_sheet(assumptionRows);
@@ -330,7 +360,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
               const checked = selectedIds.includes(driver.id);
               return <div className={`roi-driver-row ${driver.status} ${driver.family.toLowerCase()} ${checked ? "checked" : ""}`} key={driver.id}>
                 <button className="roi-check" onClick={() => toggleDriver(driver.id)} aria-pressed={checked} aria-label={`${c.select} ${driver.title}`}><span>{checked ? "✓" : ""}</span></button>
-                <div className="roi-driver-name"><b>{driver.id}</b><div><strong><i className={`roi-family-chip ${driver.family.toLowerCase()}`}>{driver.family}</i>{driver.title}</strong><small>{driver.statusLabel} · {driver.impact}</small></div></div>
+                <div className="roi-driver-name"><b>{driver.id}</b><div><strong><i className={`roi-family-chip ${driver.family.toLowerCase()}`}>{driver.family}</i>{driver.title}</strong><small><b className={`roi-evidence-gate ${isHardRoiGate(evidenceGates[driver.id]) ? "included" : "excluded"}`}>{evidenceGates[driver.id] ?? "E0"} · {isHardRoiGate(evidenceGates[driver.id]) ? layer.included : layer.excluded}</b>{driver.statusLabel} · {driver.impact}</small></div></div>
                 {checked && <label className="roi-value-field"><span>{c.annualValue}</span><input type="number" min="0" step="1000" value={driverValues[driver.id] ?? 0} onChange={(event) => setDriverValue(driver.id, Number(event.target.value))} /><em>{currency.format(safeValue(driverValues[driver.id] ?? 0))}</em></label>}
               </div>;
             })}
@@ -343,19 +373,20 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
             <label><span>{c.runCost}</span><input type="number" min="0" step="1000" value={annualRunCost} onChange={(event) => setAnnualRunCost(safeValue(Number(event.target.value)))} /><em>{currency.format(annualRunCost)}</em></label>
           </div>
           <div className="roi-total-card"><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong><small>{c.selectedBenefit}</small></div>
-          <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{c.roi}</span><strong>{roi.toFixed(1)}%</strong></div></div>
-          <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(netAnnualBenefit)}</small></div>
+          <div className="roi-gate-ledger"><div><span>{layer.baseBenefit}</span><strong>{currency.format(baseBenefit)}</strong><small>{baseDrivers.length} {c.drivers} · E2/E3</small></div><div><span>{layer.opportunityBenefit}</span><strong>{currency.format(opportunityBenefit)}</strong><small>{selectedDrivers.length - baseDrivers.length} {c.drivers} · E0/E1</small></div></div>
+          <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{layer.baseRoi}</span><strong>{roi === null ? layer.notReady : `${roi.toFixed(1)}%`}</strong></div></div>
+          <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(baseNetAnnualBenefit)}</small></div>
           <div className="roi-formula"><b>Formula / First-year ROI</b><span>{c.formula}</span></div>
           <div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div>
           <div className="roi-export-actions"><button onClick={exportPdf} className="roi-export-button pdf"><span>PDF</span>{c.pdf} <i>↓</i></button><button onClick={exportExcel} className="roi-export-button excel"><span>XLSX</span>{c.excel} <i>↓</i></button></div>
           {exportMessage && <p className="roi-export-message" role="status">{exportMessage}</p>}
         </div>
       </div>
-      <div className="roi-disclaimer"><span>{c.note}</span><p>{c.disclaimer}</p></div>
+      <div className="roi-disclaimer"><span>{c.note}</span><p>{layer.disclaimer}</p></div>
       <div className="roi-pdf-export" ref={pdfRef} aria-hidden="true">
         <header><div><span>ONE ORACLE VALUE DRIVER LIBRARY</span><h1>{c.calculation}</h1></div><b>{date}</b></header>
         <section><span className="pdf-label">Selected value drivers / {selectedDrivers.length.toString().padStart(2, "0")}</span>{selectedDrivers.map((driver) => <div className="pdf-driver" key={driver.id}><b>{driver.id}</b><div><strong>{driver.title}</strong><span>{driver.statusLabel} · {driver.impact}</span></div><em>{currency.format(safeValue(driverValues[driver.id] ?? 0))}</em></div>)}</section>
-        <section className="pdf-summary"><span className="pdf-label">ROI calculation</span><div><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong></div><div><span>{c.runCost}</span><strong>{currency.format(annualRunCost)}</strong></div><div><span>{c.implementation}</span><strong>{currency.format(implementationCost)}</strong></div><div className="pdf-highlight"><span>{c.roi}</span><strong>{roi.toFixed(1)}%</strong></div><div><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong></div></section>
+        <section className="pdf-summary"><span className="pdf-label">ROI calculation</span><div><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong></div><div><span>{layer.baseBenefit}</span><strong>{currency.format(baseBenefit)}</strong></div><div><span>{c.runCost}</span><strong>{currency.format(annualRunCost)}</strong></div><div><span>{c.implementation}</span><strong>{currency.format(implementationCost)}</strong></div><div className="pdf-highlight"><span>{layer.baseRoi}</span><strong>{roi === null ? layer.notReady : `${roi.toFixed(1)}%`}</strong></div><div><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong></div></section>
         <footer>Evidence before assertion · Inputs must be validated before external commitment.</footer>
       </div>
     </section>

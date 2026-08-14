@@ -1,8 +1,10 @@
 /* Design reminder: "决策档案室" — evidence-first interactive archive; use asymmetric editorial composition and restrained vermilion highlights. */
 import { useMemo, useState } from "react";
+import AssessmentWorkflow from "@/components/AssessmentWorkflow";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import RoiExportWorkspace from "@/components/RoiExportWorkspace";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { DEFAULT_EVIDENCE_GATES, type EvidenceGate } from "@/lib/evidence";
 import { translate } from "@/lib/i18n";
 import { DRIVERS, localizeDriver, type Driver } from "@/lib/oneOracleDrivers";
 
@@ -48,6 +50,7 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState("04");
   const [familyFilter, setFamilyFilter] = useState<FamilyFilter>("all");
   const [activeView, setActiveView] = useState<keyof typeof VIEWS>("internal");
+  const [evidenceGates, setEvidenceGates] = useState<Record<string, EvidenceGate>>(DEFAULT_EVIDENCE_GATES);
   const familyCopy = FAMILY_COPY[language];
   const localizedDrivers = useMemo(() => DRIVERS.map((driver) => localizeDriver(driver, language, t)), [language]);
   const visibleDrivers = useMemo(() => localizedDrivers.filter((driver) => familyFilter === "all" || driver.family === familyFilter), [localizedDrivers, familyFilter]);
@@ -113,9 +116,11 @@ export default function Home() {
           <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>{t("Value Assessment 是共同诊断，不是预设结论。")}</h2><p>{t("从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。")}</p><div className="question-list"><div className="question-row"><span>01</span><strong>{t("运输支出是否能与合同费率和运输事件逐项匹配？")}</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>{language === "zh" ? "进出口申报量、代理费、关税货值和原产地资格是否有按国家/贸易流的可信基线？" : language === "es" ? "¿Existen líneas base confiables por país y flujo para declaraciones, honorarios de agentes, valor sujeto a arancel y elegibilidad de origen?" : "Are filing volumes, broker fees, dutiable goods value, and origin eligibility baselined credibly by country and trade flow?"}</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>{language === "zh" ? "文件延误、例外响应与加急成本在 OTM 和 GTM 之间是否已指定唯一价值归属？" : language === "es" ? "¿Se ha asignado un único propietario de valor entre OTM y GTM para retrasos documentales, respuesta a excepciones y costes urgentes?" : "Has a single value owner been assigned between OTM and GTM for document delays, exception response, and expedite cost?"}</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>{language === "zh" ? "风险规避、FTA 和 drawback 是否具备资格、范围、实现率及法务/财务确认？" : language === "es" ? "¿Riesgo evitado, FTA y drawback tienen elegibilidad, alcance, tasa de realización y confirmación legal/financiera?" : "Do risk avoidance, FTA, and drawback have eligibility, scope, realization rate, and legal/finance confirmation?"}</strong><i>↗</i></div></div></div>
         </section>
 
+        <AssessmentWorkflow drivers={localizedDrivers} evidenceGates={evidenceGates} onEvidenceGateChange={(driverId, gate) => setEvidenceGates((current) => ({ ...current, [driverId]: gate }))} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} onSelectDriver={selectDriver} />
+
         <section className="overlap-dossier section-wrap"><div className="overlap-file"><div className="eyebrow">03.5 / One Oracle governance</div><h3>{familyCopy.overlap}</h3><p>{familyCopy.overlapCopy}</p></div><div className="overlap-matrix"><span>OTM visibility</span><b>↔</b><span>GTM documentation</span><i>ONE ECONOMIC OWNER</i><em>Delay / expedite exposure</em></div></section>
 
-        <RoiExportWorkspace drivers={localizedDrivers} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
+        <RoiExportWorkspace drivers={localizedDrivers} evidenceGates={evidenceGates} onEvidenceGateChange={(driverId, gate) => setEvidenceGates((current) => ({ ...current, [driverId]: gate }))} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
 
         <section className="narrative-section section-wrap section-anchor" id="narrative">
           <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />04 / Narrative scaffold</div><h2 className="section-heading">{t("用证据状态管理范围，而不是用全部能力堆叠范围。")}</h2></div><p className="section-intro">{t("每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。")}</p></div>

@@ -4,35 +4,17 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import RoiExportWorkspace from "@/components/RoiExportWorkspace";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translate } from "@/lib/i18n";
+import { DRIVERS, localizeDriver, type Driver } from "@/lib/oneOracleDrivers";
 
 const MANUS_ASSET_ORIGIN = "https://otmvaldriv-n3maueuh.manus.space";
 const assetUrl = (assetPath: string) => window.location.hostname.endsWith("github.io") ? `${MANUS_ASSET_ORIGIN}${assetPath}` : assetPath;
 
-type DriverStatus = "quantified" | "pending" | "directional" | "extension";
-export type Driver = {
-  id: string;
-  title: string;
-  english: string;
-  description: string;
-  status: DriverStatus;
-  statusLabel: string;
-  impact: string;
-  driver: string;
-  kpis: string[];
-  data: string;
-  narrative: string;
-};
-
-export const DRIVERS: Driver[] = [
-  { id: "01", title: "运输规划与 Cost-to-Serve 优化", english: "Planning & Cost-to-Serve", description: "以方式、路线、服务等级与合并逻辑降低每单位运输成本。", status: "pending", statusLabel: "待量化", impact: "成本与利用率", driver: "模式 / 路径选择 · 订单合并 · 加急管控", kpis: ["每票运输成本", "装载率", "加急运费"], data: "订单、费率、路线、服务等级和历史运量", narrative: "用于说明客户是否在每次运输中作出合适的成本—服务权衡。" },
-  { id: "02", title: "承运商采购、商业条款与运力管理", english: "Carrier & Capacity", description: "将竞争性运价、可靠运力与承运商履约放入同一商业控制面。", status: "pending", statusLabel: "待量化", impact: "条款与运力", driver: "电子招标 · 费率治理 · 分配合规", kpis: ["合同价差", "主承运商使用率", "接受率"], data: "合同、tender、实际运价、承运商绩效", narrative: "用于把 carrier 管理从关系管理转换为可观察的经济表现。" },
-  { id: "03", title: "运输执行与作业自动化", english: "Execution & Automation", description: "减少人工触点、重复沟通与操作偏差，让团队规模随运量而不是随人头增长。", status: "pending", statusLabel: "待量化", impact: "生产率", driver: "自动建运单 · 承运商协同 · 例外工作流", kpis: ["每票处理分钟", "自动化率", "返工率"], data: "流程日志、作业量、FTE、错误与返工记录", narrative: "用于建立业务效率而非单纯系统功能的价值基线。" },
-  { id: "04", title: "货运支出完整性、审计与财务结算", english: "Spend Integrity & Settlement", description: "识别错付、重复账单和费率偏差，并把争议、结算与预提纳入闭环。", status: "quantified", statusLabel: "已量化", impact: "支出泄漏", driver: "三方匹配 · 异常收费 · 争议闭环", kpis: ["审计命中金额", "错付率", "账单一次通过率"], data: "发票、合同费率、运输事件、争议与付款记录", narrative: "首期硬 ROI 的核心：只把可验证、可去重的回收和避免支出计入。" },
-  { id: "05", title: "运输可视化、例外响应与服务保障", english: "Visibility & Service Assurance", description: "更早看见风险、编排响应并提升承诺交付的可靠性。", status: "quantified", statusLabel: "已量化", impact: "服务与响应", driver: "里程碑 · ETA · 延迟预警 · 状态沟通", kpis: ["OTIF", "例外关闭时间", "加急补救成本"], data: "里程碑、ETA、延迟事件、客服与补救成本", narrative: "与 freight audit 组合形成“检测—决策—纠正—结算”的可验证闭环。" },
-  { id: "06", title: "自有车队、设备与资产生产率", english: "Fleet & Asset Productivity", description: "在自有和外包运力之间优化车辆、司机、设备与回程资源。", status: "directional", statusLabel: "方向性", impact: "资产利用", driver: "自有/外包平衡 · 设备调配 · 空驶控制", kpis: ["空驶率", "自有车队利用率", "设备周转"], data: "车队状态、司机、设备、外包成本和线路", narrative: "仅在客户拥有或混合使用车队时进入正式价值范围。" },
-  { id: "07", title: "网络决策、绩效洞察与持续改善", english: "Network Intelligence", description: "用真实运营数据进行情景建模，把单次优化变成可持续的治理机制。", status: "directional", statusLabel: "方向性", impact: "结构性改善", driver: "情景建模 · 车道治理 · 根因洞察", kpis: ["网络 Cost-to-Serve", "计划/实际偏差", "兑现率"], data: "历史运输、网络约束、成本、服务与情景参数", narrative: "作为已验证执行价值之后的结构性扩展，而不是首期 ROI 的填充项。" },
-  { id: "08", title: "合规、碳排与韧性", english: "Compliance, Carbon & Resilience", description: "当客户议程覆盖跨境、ESG 或供应链风险时，才作为可选扩展领域。", status: "extension", statusLabel: "可选扩展", impact: "风险与外部性", driver: "排放分析 · 中断情景 · 文件完备性", kpis: ["CO₂e / 运量", "合规事件", "恢复时间"], data: "排放、法规、事件、路线与业务连续性数据", narrative: "需明确产品边界；跨境贸易深度合规不应默认归因于 OTM。" },
-];
+type FamilyFilter = "all" | "OTM" | "GTM";
+const FAMILY_COPY = {
+  zh: { all: "全部价值域", otm: "OTM 运输", gtm: "GTM 贸易", headline: "十五个价值域，一套 One Oracle 证据库。", intro: "将运输与全球贸易放在同一价值治理模型中；不同能力可联动，但同一经济结果只能被一个主 driver 认领。", capability: "能力", formula: "ROI 公式", overlap: "跨域去重检查", overlapCopy: "文件延误、异常响应与加急成本可能同时触发 OTM 与 GTM；导出前必须指定唯一的价值归属。" },
+  en: { all: "All value domains", otm: "OTM transport", gtm: "GTM trade", headline: "Fifteen value domains. One One-Oracle evidence library.", intro: "Place transportation and global trade in one value-governance model. Capabilities can work together, but only one primary driver may claim the same economic outcome.", capability: "Capability", formula: "ROI formula", overlap: "Cross-domain de-duplication check", overlapCopy: "Document delays, exception response, and expedite costs can arise in both OTM and GTM. Assign one owner before export." },
+  es: { all: "Todos los dominios", otm: "Transporte OTM", gtm: "Comercio GTM", headline: "Quince dominios de valor. Una biblioteca de evidencia One Oracle.", intro: "Sitúe transporte y comercio global en un modelo de gobierno de valor. Las capacidades pueden colaborar, pero un único driver principal debe reclamar cada resultado económico.", capability: "Capacidad", formula: "Fórmula ROI", overlap: "Control de deduplicación entre dominios", overlapCopy: "Retrasos documentales, respuesta a excepciones y costes urgentes pueden aparecer en OTM y GTM. Asigne un propietario antes de exportar." },
+} as const;
 
 const VIEWS = {
   internal: {
@@ -64,24 +46,27 @@ export default function Home() {
   const { language } = useLanguage();
   const t = (value: string) => translate(language, value);
   const [selectedId, setSelectedId] = useState("04");
+  const [familyFilter, setFamilyFilter] = useState<FamilyFilter>("all");
   const [activeView, setActiveView] = useState<keyof typeof VIEWS>("internal");
-  const localizedDrivers = useMemo(() => DRIVERS.map((driver) => ({ ...driver, title: t(driver.title), description: t(driver.description), statusLabel: t(driver.statusLabel), impact: t(driver.impact), driver: t(driver.driver), kpis: driver.kpis.map(t), data: t(driver.data), narrative: t(driver.narrative) })), [language]);
-  const selected = useMemo(() => localizedDrivers.find((driver) => driver.id === selectedId) ?? localizedDrivers[3], [localizedDrivers, selectedId]);
+  const familyCopy = FAMILY_COPY[language];
+  const localizedDrivers = useMemo(() => DRIVERS.map((driver) => localizeDriver(driver, language, t)), [language]);
+  const visibleDrivers = useMemo(() => localizedDrivers.filter((driver) => familyFilter === "all" || driver.family === familyFilter), [localizedDrivers, familyFilter]);
+  const selected = useMemo(() => localizedDrivers.find((driver) => driver.id === selectedId) ?? localizedDrivers[0], [localizedDrivers, selectedId]);
   const view = VIEWS[activeView];
 
   const selectDriver = (id: string) => { setSelectedId(id); window.setTimeout(() => scrollToId("driver-detail"), 10); };
 
   return (
     <div className="archive-shell">
-      <div className="top-ledger"><span>OTM Value Driver Library · Framework v0.1</span><div className="top-ledger-tools"><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
+      <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />One Oracle Value Driver Library · Framework v0.2</span><div className="top-ledger-tools"><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
       <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
         <div className="brand-block">
           <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />
-          <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">OTM / Decision Archive</div></div>
+          <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">One Oracle / Decision Archive</div></div>
         </div>
         <nav className="rail-nav">
-          <p className="rail-kicker">Value domains / 08</p>
-          {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`nav-archive-item ${selectedId === driver.id ? "active" : ""}`}><span className="nav-index">{driver.id}</span><span className="nav-label">{driver.title}</span><i className={`nav-dot ${driver.status}`} /></button>)}
+          <p className="rail-kicker">Value domains / {String(localizedDrivers.length).padStart(2, "0")}</p>
+          {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`nav-archive-item ${selectedId === driver.id ? "active" : ""}`}><span className="nav-index">{driver.family === "GTM" ? "G" : driver.id}</span><span className="nav-label">{driver.title}</span><i className={`nav-dot ${driver.status}`} /></button>)}
         </nav>
         <div className="rail-footer"><span>{t("框架原则")}</span><p>{t("价值主张必须可追溯到痛点、能力、经营变量、KPI 与证据状态。")}</p></div>
       </aside>
@@ -94,10 +79,11 @@ export default function Home() {
           <div className="hero-evidence-stamp" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>EVIDENCE<br />FILED</span><b>01</b></div>
           <div className="hero-margin-file" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>CASE FILE</span><b>01</b><i>US / Audit + Visibility</i></div>
           <div className="hero-content">
+            <div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>FILE / OO-VDL-001</span><b>DECISION EVIDENCE</b><i>OTM ↔ GTM</i></div>
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
             <div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div>
             <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
-            <p className="hero-copy">{t("以 OTM 能力、客户数据、ROI 方法和决策叙事构成一条有证据、可回溯、可组装的价值路径。")}</p>
+            <p className="hero-copy">{language === "zh" ? "以 OTM、GTM 能力、客户数据、ROI 方法和决策叙事构成一条有证据、可回溯、可组装的 One Oracle 价值路径。" : language === "es" ? "Conecte capacidades OTM y GTM, datos del cliente, métodos ROI y narrativa de decisión en una ruta de valor One Oracle trazable y basada en evidencia." : "Connect OTM and GTM capabilities, customer data, ROI methods, and a decision narrative into an evidence-led, traceable One Oracle value path."}</p>
             <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>
             <div className="hero-actions"><a className="button-archive" href="#library">{t("检索价值档案")} <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>{t("验证当前证据")} <span>↗</span></button></div>
           </div>
@@ -105,13 +91,14 @@ export default function Home() {
         </section>
 
         <section className="section-wrap section-anchor" id="library">
-          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / Value map</div><h2 className="section-heading">{t("八个领域，一张可以复用的价值地图。")}</h2></div><div className="value-map-intro"><p className="section-intro">{t("一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。")}</p><div className="evidence-legend" aria-label="Evidence status"><span className="quantified">{t("已量化")}</span><span className="pending">{t("待量化")}</span><span className="directional">{t("方向性")}</span><span className="extension">{t("可选扩展")}</span></div></div></div>
-          <div className="value-map" aria-label="OTM value domains">
-            {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`value-row ${driver.status} ${selectedId === driver.id ? "selected" : ""}`} aria-pressed={selectedId === driver.id}><span className="value-number">{driver.id}</span><div className="value-title">{driver.title}<span>{driver.english}</span></div><div className="value-description">{driver.description}</div><span className={`status-label ${driver.status}`}><b />{driver.statusLabel}</span><span className="row-arrow">→</span></button>)}
+          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / One Oracle value map</div><h2 className="section-heading">{familyCopy.headline}</h2></div><div className="value-map-intro"><p className="section-intro">{familyCopy.intro}</p><div className="evidence-legend" aria-label="Evidence status"><span className="quantified">{t("已量化")}</span><span className="pending">{t("待量化")}</span><span className="directional">{t("方向性")}</span><span className="extension">{t("可选扩展")}</span></div></div></div>
+          <div className="library-family-tabs" role="tablist" aria-label="One Oracle capability families"><button className={familyFilter === "all" ? "active" : ""} onClick={() => setFamilyFilter("all")}>{familyCopy.all}<b>{localizedDrivers.length}</b></button><button className={familyFilter === "OTM" ? "active" : ""} onClick={() => setFamilyFilter("OTM")}>{familyCopy.otm}<b>{localizedDrivers.filter((driver) => driver.family === "OTM").length}</b></button><button className={familyFilter === "GTM" ? "active" : ""} onClick={() => setFamilyFilter("GTM")}>{familyCopy.gtm}<b>{localizedDrivers.filter((driver) => driver.family === "GTM").length}</b></button></div>
+          <div className="value-map" aria-label="One Oracle value domains">
+            {visibleDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`value-row ${driver.status} ${driver.family.toLowerCase()} ${selectedId === driver.id ? "selected" : ""}`} aria-pressed={selectedId === driver.id}><span className="value-number">{driver.id}</span><div className="value-title"><i className={`family-chip ${driver.family.toLowerCase()}`}>{driver.family}</i>{driver.title}<span>{driver.english}</span></div><div className="value-description">{driver.description}</div><span className={`status-label ${driver.status}`}><b />{driver.statusLabel}</span><span className="row-arrow">→</span></button>)}
           </div>
           <article className="detail-drawer" id="driver-detail" aria-live="polite">
-            <div><div className="detail-kicker">Selected driver / {selected.id} · {selected.statusLabel}</div><h3>{selected.title}</h3><p>{selected.narrative}</p><div className="path-line"><span className="path-step"><b>01</b>{t("客户痛点")}</span><span className="path-step"><b>02</b>{t("OTM 能力")}</span><span className="path-step"><b>03</b>{t("经营变量")}</span><span className="path-step"><b>04</b>KPI</span><span className="path-step"><b>05</b>{t("价值判断")}</span></div></div>
-            <div className="detail-aside"><h4>Evidence register</h4><div className="mini-metric"><span>Value</span><strong>{selected.impact}</strong></div><div className="mini-metric"><span>Drivers</span><strong>{selected.driver}</strong></div><div className="mini-metric"><span>KPIs</span><strong>{selected.kpis.join(" · ")}</strong></div><div className="mini-metric"><span>Data</span><strong>{selected.data}</strong></div></div>
+            <div><div className="detail-file-strip"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>DRIVER FILE / {selected.family}-{selected.id}</span><b className={selected.status}>{selected.statusLabel}</b></div><div className="detail-kicker">{selected.family} / Selected driver / {selected.id} · {selected.statusLabel}</div><h3>{selected.title}</h3><p>{selected.narrative}</p><div className="path-line"><span className="path-step"><b>01</b>{t("客户痛点")}</span><span className="path-step"><b>02</b>{selected.family} {familyCopy.capability}</span><span className="path-step"><b>03</b>{t("经营变量")}</span><span className="path-step"><b>04</b>KPI</span><span className="path-step"><b>05</b>{t("价值判断")}</span></div></div>
+            <div className="detail-aside"><h4>Evidence register</h4><div className="detail-status-ledger"><i className={selected.status} /><span>{selected.statusLabel}</span><b>FILED / {selected.family}</b></div><div className="mini-metric"><span>Value</span><strong>{selected.impact}</strong></div><div className="mini-metric"><span>Drivers</span><strong>{selected.driver}</strong></div><div className="mini-metric"><span>KPIs</span><strong>{selected.kpis.join(" · ")}</strong></div><div className="mini-metric"><span>Data</span><strong>{selected.data}</strong></div><div className="mini-metric"><span>{familyCopy.formula}</span><strong>{selected.formula}</strong></div></div>
           </article>
         </section>
 
@@ -123,8 +110,10 @@ export default function Home() {
 
         <section className="assessment-grid section-anchor" id="assessment">
           <div className="assessment-image"><img src={assetUrl("/manus-storage/otm-evidence-path_0f8a0592.jpg")} alt="Abstract value evidence path" /></div>
-          <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>{t("Value Assessment 是共同诊断，不是预设结论。")}</h2><p>{t("从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。")}</p><div className="question-list"><div className="question-row"><span>01</span><strong>{t("运输支出是否能与合同费率和运输事件逐项匹配？")}</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>{t("异常和延迟被识别时，是否还来得及采取纠正行动？")}</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>{t("哪些 KPI 已有可信基线，哪些仍需作为方向性价值？")}</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>{t("US 证据与 Europe 证据是否被明确隔离，避免错误外推？")}</strong><i>↗</i></div></div></div>
+          <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>{t("Value Assessment 是共同诊断，不是预设结论。")}</h2><p>{t("从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。")}</p><div className="question-list"><div className="question-row"><span>01</span><strong>{t("运输支出是否能与合同费率和运输事件逐项匹配？")}</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>{language === "zh" ? "进出口申报量、代理费、关税货值和原产地资格是否有按国家/贸易流的可信基线？" : language === "es" ? "¿Existen líneas base confiables por país y flujo para declaraciones, honorarios de agentes, valor sujeto a arancel y elegibilidad de origen?" : "Are filing volumes, broker fees, dutiable goods value, and origin eligibility baselined credibly by country and trade flow?"}</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>{language === "zh" ? "文件延误、例外响应与加急成本在 OTM 和 GTM 之间是否已指定唯一价值归属？" : language === "es" ? "¿Se ha asignado un único propietario de valor entre OTM y GTM para retrasos documentales, respuesta a excepciones y costes urgentes?" : "Has a single value owner been assigned between OTM and GTM for document delays, exception response, and expedite cost?"}</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>{language === "zh" ? "风险规避、FTA 和 drawback 是否具备资格、范围、实现率及法务/财务确认？" : language === "es" ? "¿Riesgo evitado, FTA y drawback tienen elegibilidad, alcance, tasa de realización y confirmación legal/financiera?" : "Do risk avoidance, FTA, and drawback have eligibility, scope, realization rate, and legal/finance confirmation?"}</strong><i>↗</i></div></div></div>
         </section>
+
+        <section className="overlap-dossier section-wrap"><div className="overlap-file"><div className="eyebrow">03.5 / One Oracle governance</div><h3>{familyCopy.overlap}</h3><p>{familyCopy.overlapCopy}</p></div><div className="overlap-matrix"><span>OTM visibility</span><b>↔</b><span>GTM documentation</span><i>ONE ECONOMIC OWNER</i><em>Delay / expedite exposure</em></div></section>
 
         <RoiExportWorkspace drivers={localizedDrivers} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
 

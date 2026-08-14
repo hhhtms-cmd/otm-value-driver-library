@@ -4,16 +4,9 @@ import { jsPDF } from "jspdf";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import type { Driver } from "@/lib/oneOracleDrivers";
 
-type DriverOption = {
-  id: string;
-  title: string;
-  english: string;
-  status: string;
-  statusLabel: string;
-  impact: string;
-  kpis: string[];
-};
+type DriverOption = Pick<Driver, "id" | "family" | "title" | "english" | "status" | "statusLabel" | "impact" | "kpis" | "formula">;
 
 type RoiExportWorkspaceProps = { drivers: DriverOption[]; brandMarkSrc: string };
 
@@ -55,9 +48,9 @@ const readStoredScenarios = (): RoiScenario[] => {
 };
 
 const ROI_COPY: Record<Language, Record<string, string>> = {
-  zh: { title: "把已选择的证据，带进可下载的商业案例。", intro: "选择相关 driver，录入年度价值与成本假设。网站会即时计算首年 ROI 与回收期，并生成 PDF 或 Excel 摘要。", importTitle: "导入客户 Excel 基线，让假设自动就位。", importCopy: "文件只在当前浏览器中读取，不会上传或保存到服务器。建议使用模板；系统也能识别此前导出的 Excel 工作簿中的标准字段。", choose: "选择客户 Excel", template: "下载空白模板", review: "导入复核", prefilled: "个 driver 已预填", scenarioTitle: "将当前基线保存为情景，并并排审阅价值假设。", scenarioCopy: "情景只保存在当前浏览器。它包含已选 driver、年度价值及实施／运营成本，不会改变原始导入文件。", scenarioName: "情景名称", placeholder: "例如：US 审计 + Visibility 基准", new: "另存新情景", update: "更新当前情景", save: "保存当前情景", register: "已保存情景登记", saved: "已存", current: "当前", benefit: "年度收益", roi: "首年 ROI", payback: "回收期", firstYear: "首年净收益", drivers: "个 driver", load: "载入", delete: "删除", empty: "导入或编辑假设后，为当前基线命名并保存，即可在此建立并排的 ROI 比较。", select: "选择价值驱动因素", selectCopy: "只有被选择的 driver 会进入计算与导出文件。金额默认是示例，需由你的客户数据替换。", annualValue: "年度价值 / USD", calculation: "ROI 计算摘要", implementation: "一次性实施成本", runCost: "年度运营成本", gross: "年度毛收益", selectedBenefit: "由已选 driver 的年度价值构成", noPayback: "未达到正向回收", netAnnual: "以年度净收益", formula: "（年度收益 − 年度运营成本 − 一次性实施成本）÷ 一次性实施成本", pdf: "下载决策摘要", excel: "下载可编辑工作簿", note: "重要说明", disclaimer: "此工具输出基于用户输入的年度价值与成本假设，适合形成可讨论的 Business Case 初稿；在对外承诺 ROI 前，应按 driver 卡的数据质量门槛、适用范围与去重规则完成确认。", selectLabel: "选择证据", calculateLabel: "计算价值", importLabel: "导入基线", compareLabel: "保存与比较", months: "个月" },
-  en: { title: "Turn selected evidence into a downloadable business case.", intro: "Select relevant drivers and enter annual-value and cost assumptions. The workspace calculates first-year ROI and payback, then produces a PDF or Excel summary.", importTitle: "Import a customer Excel baseline and let assumptions fall into place.", importCopy: "The file is read only in this browser; it is never uploaded or saved to a server. Use the template where possible; standard fields in a previously exported workbook are also recognized.", choose: "Choose customer Excel", template: "Download blank template", review: "Import review", prefilled: "drivers prefilled", scenarioTitle: "Save the current baseline as a scenario and review value assumptions side by side.", scenarioCopy: "Scenarios stay only in this browser. Each includes selected drivers, annual values, and implementation/operating costs; the original imported file is unchanged.", scenarioName: "Scenario name", placeholder: "e.g., US Audit + Visibility baseline", new: "Save as new scenario", update: "Update current scenario", save: "Save current scenario", register: "Saved scenario register", saved: "Saved", current: "Current", benefit: "Annual benefit", roi: "First-year ROI", payback: "Payback", firstYear: "First-year net benefit", drivers: "drivers", load: "Load", delete: "Delete", empty: "After importing or editing assumptions, name and save the baseline to build a side-by-side ROI comparison here.", select: "Select value drivers", selectCopy: "Only selected drivers enter calculations and exports. Values are illustrative until replaced by customer data.", annualValue: "Annual value / USD", calculation: "ROI calculation summary", implementation: "One-time implementation cost", runCost: "Annual operating cost", gross: "Annual gross benefit", selectedBenefit: "from selected-driver annual values", noPayback: "No positive payback", netAnnual: "using annual net benefit", formula: "(Annual benefit − annual operating cost − implementation cost) ÷ implementation cost", pdf: "Download decision summary", excel: "Download editable workbook", note: "Important note", disclaimer: "This output relies on user-entered annual-value and cost assumptions. It is suitable for a discussable business-case draft; confirm data-quality gates, scope, and de-duplication rules before making an external ROI commitment.", selectLabel: "Select evidence", calculateLabel: "Calculate value", importLabel: "Import baseline", compareLabel: "Save & compare", months: "months" },
-  es: { title: "Convierta la evidencia seleccionada en un caso de negocio descargable.", intro: "Seleccione drivers relevantes e introduzca supuestos de valor anual y coste. El espacio calcula ROI y recuperación del primer año, y genera un resumen PDF o Excel.", importTitle: "Importe una línea base Excel del cliente y haga que los supuestos encajen.", importCopy: "El archivo se lee solo en este navegador; nunca se carga ni se guarda en un servidor. Use la plantilla cuando sea posible; también se reconocen campos estándar de libros exportados previamente.", choose: "Elegir Excel del cliente", template: "Descargar plantilla vacía", review: "Revisión de importación", prefilled: "drivers precargados", scenarioTitle: "Guarde la línea base actual como escenario y revise los supuestos de valor en paralelo.", scenarioCopy: "Los escenarios permanecen solo en este navegador. Incluyen drivers seleccionados, valores anuales y costes de implementación/operación; el archivo original no cambia.", scenarioName: "Nombre del escenario", placeholder: "p. ej., línea base de auditoría + visibilidad en EE. UU.", new: "Guardar como escenario nuevo", update: "Actualizar escenario actual", save: "Guardar escenario actual", register: "Registro de escenarios guardados", saved: "Guardado", current: "Actual", benefit: "Beneficio anual", roi: "ROI del primer año", payback: "Recuperación", firstYear: "Beneficio neto del primer año", drivers: "drivers", load: "Cargar", delete: "Eliminar", empty: "Después de importar o editar supuestos, nombre y guarde la línea base para crear aquí una comparación ROI en paralelo.", select: "Seleccionar drivers de valor", selectCopy: "Solo los drivers seleccionados entran en cálculos y exportaciones. Los valores son ilustrativos hasta reemplazarlos con datos del cliente.", annualValue: "Valor anual / USD", calculation: "Resumen de cálculo ROI", implementation: "Coste único de implementación", runCost: "Coste operativo anual", gross: "Beneficio bruto anual", selectedBenefit: "de valores anuales de drivers seleccionados", noPayback: "Sin recuperación positiva", netAnnual: "usando beneficio neto anual", formula: "(Beneficio anual − coste operativo anual − coste de implementación) ÷ coste de implementación", pdf: "Descargar resumen de decisión", excel: "Descargar libro editable", note: "Nota importante", disclaimer: "Esta salida se basa en supuestos de valor anual y coste introducidos por el usuario. Es apta para un borrador de caso de negocio; confirme umbrales de calidad de datos, alcance y deduplicación antes de comprometer un ROI externo.", selectLabel: "Seleccionar evidencia", calculateLabel: "Calcular valor", importLabel: "Importar línea base", compareLabel: "Guardar y comparar", months: "meses" },
+  zh: { title: "把已选择的证据，带进可下载的商业案例。", intro: "选择相关 OTM/GTM driver，录入年度价值与成本假设。网站会即时计算首年 ROI 与回收期，并生成 PDF 或 Excel 摘要。", importTitle: "导入客户 Excel 基线，让假设自动就位。", importCopy: "文件只在当前浏览器中读取，不会上传或保存到服务器。建议使用模板；系统也能识别此前导出的 Excel 工作簿中的标准字段。", choose: "选择客户 Excel", template: "下载空白模板", review: "导入复核", prefilled: "个 driver 已预填", scenarioTitle: "将当前基线保存为情景，并并排审阅价值假设。", scenarioCopy: "情景只保存在当前浏览器。它包含已选 driver、年度价值及实施／运营成本，不会改变原始导入文件。", scenarioName: "情景名称", placeholder: "例如：US 审计 + GTM 代理费基准", new: "另存新情景", update: "更新当前情景", save: "保存当前情景", register: "已保存情景登记", saved: "已存", current: "当前", benefit: "年度收益", roi: "首年 ROI", payback: "回收期", firstYear: "首年净收益", drivers: "个 driver", load: "载入", delete: "删除", empty: "导入或编辑假设后，为当前基线命名并保存，即可在此建立并排的 ROI 比较。", select: "选择价值驱动因素", selectCopy: "只有被选择的 driver 会进入计算与导出文件。金额默认是示例，需由你的客户数据替换。", annualValue: "年度价值 / USD", calculation: "ROI 计算摘要", implementation: "一次性实施成本", runCost: "年度运营成本", gross: "年度毛收益", selectedBenefit: "由已选 driver 的年度价值构成", noPayback: "未达到正向回收", netAnnual: "以年度净收益", formula: "（年度收益 − 年度运营成本 − 一次性实施成本）÷ 一次性实施成本", pdf: "下载决策摘要", excel: "下载可编辑工作簿", note: "重要说明", disclaimer: "此工具输出基于用户输入的年度价值与成本假设，适合形成可讨论的 Business Case 初稿；在对外承诺 ROI 前，应按 driver 卡的数据质量门槛、适用范围、币种及去重规则完成确认。", selectLabel: "选择证据", calculateLabel: "计算价值", importLabel: "导入基线", compareLabel: "保存与比较", months: "个月", otm: "OTM 运输", gtm: "GTM 贸易", formulaFamily: "公式家族", overlap: "OTM/GTM 重叠检查", overlapRisk: "文件延误、例外响应或加急成本可能重复计入。请在导出前指定唯一价值归属。" },
+  en: { title: "Turn selected evidence into a downloadable business case.", intro: "Select relevant OTM/GTM drivers and enter annual-value and cost assumptions. The workspace calculates first-year ROI and payback, then produces a PDF or Excel summary.", importTitle: "Import a customer Excel baseline and let assumptions fall into place.", importCopy: "The file is read only in this browser; it is never uploaded or saved to a server. Use the template where possible; standard fields in a previously exported workbook are also recognized.", choose: "Choose customer Excel", template: "Download blank template", review: "Import review", prefilled: "drivers prefilled", scenarioTitle: "Save the current baseline as a scenario and review value assumptions side by side.", scenarioCopy: "Scenarios stay only in this browser. Each includes selected drivers, annual values, and implementation/operating costs; the original imported file is unchanged.", scenarioName: "Scenario name", placeholder: "e.g., US audit + GTM broker-fee baseline", new: "Save as new scenario", update: "Update current scenario", save: "Save current scenario", register: "Saved scenario register", saved: "Saved", current: "Current", benefit: "Annual benefit", roi: "First-year ROI", payback: "Payback", firstYear: "First-year net benefit", drivers: "drivers", load: "Load", delete: "Delete", empty: "After importing or editing assumptions, name and save the baseline to build a side-by-side ROI comparison here.", select: "Select value drivers", selectCopy: "Only selected drivers enter calculations and exports. Values are illustrative until replaced by customer data.", annualValue: "Annual value / USD", calculation: "ROI calculation summary", implementation: "One-time implementation cost", runCost: "Annual operating cost", gross: "Annual gross benefit", selectedBenefit: "from selected-driver annual values", noPayback: "No positive payback", netAnnual: "using annual net benefit", formula: "(Annual benefit − annual operating cost − implementation cost) ÷ implementation cost", pdf: "Download decision summary", excel: "Download editable workbook", note: "Important note", disclaimer: "This output relies on user-entered annual-value and cost assumptions. It is suitable for a discussable business-case draft; confirm data-quality gates, scope, currency, and de-duplication rules before making an external ROI commitment.", selectLabel: "Select evidence", calculateLabel: "Calculate value", importLabel: "Import baseline", compareLabel: "Save & compare", months: "months", otm: "OTM transport", gtm: "GTM trade", formulaFamily: "Formula family", overlap: "OTM/GTM overlap check", overlapRisk: "Document delay, exception response, or expedite cost may be counted twice. Assign one value owner before export." },
+  es: { title: "Convierta la evidencia seleccionada en un caso de negocio descargable.", intro: "Seleccione drivers OTM/GTM e introduzca supuestos de valor anual y coste. El espacio calcula ROI y recuperación del primer año, y genera un resumen PDF o Excel.", importTitle: "Importe una línea base Excel del cliente y haga que los supuestos encajen.", importCopy: "El archivo se lee solo en este navegador; nunca se carga ni se guarda en un servidor. Use la plantilla cuando sea posible; también se reconocen campos estándar de libros exportados previamente.", choose: "Elegir Excel del cliente", template: "Descargar plantilla vacía", review: "Revisión de importación", prefilled: "drivers precargados", scenarioTitle: "Guarde la línea base actual como escenario y revise los supuestos de valor en paralelo.", scenarioCopy: "Los escenarios permanecen solo en este navegador. Incluyen drivers seleccionados, valores anuales y costes de implementación/operación; el archivo original no cambia.", scenarioName: "Nombre del escenario", placeholder: "p. ej., línea base de auditoría + honorarios GTM en EE. UU.", new: "Guardar como escenario nuevo", update: "Actualizar escenario actual", save: "Guardar escenario actual", register: "Registro de escenarios guardados", saved: "Guardado", current: "Actual", benefit: "Beneficio anual", roi: "ROI del primer año", payback: "Recuperación", firstYear: "Beneficio neto del primer año", drivers: "drivers", load: "Cargar", delete: "Eliminar", empty: "Después de importar o editar supuestos, nombre y guarde la línea base para crear aquí una comparación ROI en paralelo.", select: "Seleccionar drivers de valor", selectCopy: "Solo los drivers seleccionados entran en cálculos y exportaciones. Los valores son ilustrativos hasta reemplazarlos con datos del cliente.", annualValue: "Valor anual / USD", calculation: "Resumen de cálculo ROI", implementation: "Coste único de implementación", runCost: "Coste operativo anual", gross: "Beneficio bruto anual", selectedBenefit: "de valores anuales de drivers seleccionados", noPayback: "Sin recuperación positiva", netAnnual: "usando beneficio neto anual", formula: "(Beneficio anual − coste operativo anual − coste de implementación) ÷ coste de implementación", pdf: "Descargar resumen de decisión", excel: "Descargar libro editable", note: "Nota importante", disclaimer: "Esta salida se basa en supuestos de valor anual y coste introducidos por el usuario. Es apta para un borrador de caso de negocio; confirme calidad de datos, alcance, moneda y deduplicación antes de comprometer un ROI externo.", selectLabel: "Seleccionar evidencia", calculateLabel: "Calcular valor", importLabel: "Importar línea base", compareLabel: "Guardar y comparar", months: "meses", otm: "Transporte OTM", gtm: "Comercio GTM", formulaFamily: "Familia de fórmulas", overlap: "Control de solapamiento OTM/GTM", overlapRisk: "Retraso documental, respuesta a excepciones o coste urgente pueden contarse dos veces. Asigne un propietario antes de exportar." },
 };
 
 export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportWorkspaceProps) {
@@ -80,6 +73,8 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedDrivers = useMemo(() => drivers.filter((driver) => selectedIds.includes(driver.id)), [drivers, selectedIds]);
+  const selectedByFamily = useMemo(() => ({ OTM: selectedDrivers.filter((driver) => driver.family === "OTM"), GTM: selectedDrivers.filter((driver) => driver.family === "GTM") }), [selectedDrivers]);
+  const potentialOverlap = selectedIds.includes("05") && selectedIds.includes("GTM-02");
   const totalBenefit = useMemo(() => selectedDrivers.reduce((total, driver) => total + safeValue(driverValues[driver.id] ?? 0), 0), [driverValues, selectedDrivers]);
   const netAnnualBenefit = totalBenefit - safeValue(annualRunCost);
   const firstYearNetBenefit = totalBenefit - safeValue(implementationCost) - safeValue(annualRunCost);
@@ -146,7 +141,9 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const downloadTemplate = () => {
     const driverBaseline = drivers.map((driver) => ({
       "Driver ID": driver.id,
+      "Capability Family": driver.family,
       "Value Driver": driver.title,
+      "ROI Formula Family": driver.formula,
       "Annual Benefit (USD)": "",
       "Evidence Notes": "",
     }));
@@ -161,7 +158,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
     costSheet["!cols"] = [{ wch: 34 }, { wch: 18 }, { wch: 12 }];
     XLSX.utils.book_append_sheet(workbook, driverSheet, "Driver Baseline");
     XLSX.utils.book_append_sheet(workbook, costSheet, "Cost Assumptions");
-    XLSX.writeFile(workbook, "otm-roi-baseline-template.xlsx", { compression: true });
+    XLSX.writeFile(workbook, "one-oracle-otm-gtm-roi-baseline-template.xlsx", { compression: true });
     updateMessage("空白基线模板已开始下载。请填写年度价值与成本后再导入。 ");
   };
 
@@ -235,9 +232,11 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const exportExcel = () => {
     if (!selectedDrivers.length) { updateMessage("请至少选择一个价值驱动因素后再导出。"); return; }
     const summaryRows = [
-      ["OTM Value Driver Library — ROI Summary"],
+      ["One Oracle Value Driver Library — ROI Summary"],
       ["Report date", date],
       ["Selected drivers", selectedDrivers.length],
+      ["OTM drivers", selectedByFamily.OTM.length],
+      ["GTM drivers", selectedByFamily.GTM.length],
       [],
       ["Metric", "Value (USD / %)"],
       ["Annual gross benefit", totalBenefit],
@@ -250,11 +249,13 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
     ];
     const driverRows = selectedDrivers.map((driver) => ({
       "Driver ID": driver.id,
+      "Capability Family": driver.family,
       "Value Driver": driver.title,
       "English Name": driver.english,
       "Evidence Status": driver.statusLabel,
       "Value Path": driver.impact,
       "Primary KPIs": driver.kpis.join(" / "),
+      "ROI Formula Family": driver.formula,
       "Annual Benefit (USD)": safeValue(driverValues[driver.id] ?? 0),
     }));
     const assumptionRows = [
@@ -265,15 +266,15 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
     const workbook = XLSX.utils.book_new();
     const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
     summarySheet["!cols"] = [{ wch: 32 }, { wch: 44 }];
-    summarySheet["B11"].z = "0.0%";
+    summarySheet["B13"].z = "0.0%";
     const driversSheet = XLSX.utils.json_to_sheet(driverRows);
-    driversSheet["!cols"] = [{ wch: 12 }, { wch: 38 }, { wch: 34 }, { wch: 15 }, { wch: 18 }, { wch: 40 }, { wch: 22 }];
+    driversSheet["!cols"] = [{ wch: 12 }, { wch: 18 }, { wch: 38 }, { wch: 34 }, { wch: 15 }, { wch: 18 }, { wch: 35 }, { wch: 48 }, { wch: 22 }];
     const assumptionsSheet = XLSX.utils.json_to_sheet(assumptionRows);
     assumptionsSheet["!cols"] = [{ wch: 32 }, { wch: 76 }, { wch: 16 }];
     XLSX.utils.book_append_sheet(workbook, summarySheet, "ROI Summary");
     XLSX.utils.book_append_sheet(workbook, driversSheet, "Selected Drivers");
     XLSX.utils.book_append_sheet(workbook, assumptionsSheet, "Assumptions");
-    XLSX.writeFile(workbook, `otm-value-driver-roi-${date}.xlsx`, { compression: true });
+    XLSX.writeFile(workbook, `one-oracle-otm-gtm-roi-${date}.xlsx`, { compression: true });
     updateMessage("Excel 工作簿已开始下载。它包含 ROI Summary、Selected Drivers 和 Assumptions 三个表。 ");
   };
 
@@ -322,14 +323,14 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
       </div>
       <div className="roi-workspace">
         <div className="roi-selection-panel">
-          <div className="roi-panel-heading"><div><span>01 / {c.selectLabel}</span><h3>{c.select}</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedDrivers.length.toString().padStart(2, "0")} / 08</b></div></div>
+          <div className="roi-panel-heading"><div><span>01 / {c.selectLabel}</span><h3>{c.select}</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedDrivers.length.toString().padStart(2, "0")} / {drivers.length.toString().padStart(2, "0")}</b></div></div>
           <p className="roi-panel-copy">{c.selectCopy}</p>
           <div className="roi-driver-list">
             {drivers.map((driver) => {
               const checked = selectedIds.includes(driver.id);
-              return <div className={`roi-driver-row ${driver.status} ${checked ? "checked" : ""}`} key={driver.id}>
+              return <div className={`roi-driver-row ${driver.status} ${driver.family.toLowerCase()} ${checked ? "checked" : ""}`} key={driver.id}>
                 <button className="roi-check" onClick={() => toggleDriver(driver.id)} aria-pressed={checked} aria-label={`${c.select} ${driver.title}`}><span>{checked ? "✓" : ""}</span></button>
-                <div className="roi-driver-name"><b>{driver.id}</b><div><strong>{driver.title}</strong><small>{driver.statusLabel} · {driver.impact}</small></div></div>
+                <div className="roi-driver-name"><b>{driver.id}</b><div><strong><i className={`roi-family-chip ${driver.family.toLowerCase()}`}>{driver.family}</i>{driver.title}</strong><small>{driver.statusLabel} · {driver.impact}</small></div></div>
                 {checked && <label className="roi-value-field"><span>{c.annualValue}</span><input type="number" min="0" step="1000" value={driverValues[driver.id] ?? 0} onChange={(event) => setDriverValue(driver.id, Number(event.target.value))} /><em>{currency.format(safeValue(driverValues[driver.id] ?? 0))}</em></label>}
               </div>;
             })}
@@ -345,13 +346,14 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
           <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{c.roi}</span><strong>{roi.toFixed(1)}%</strong></div></div>
           <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(netAnnualBenefit)}</small></div>
           <div className="roi-formula"><b>Formula / First-year ROI</b><span>{c.formula}</span></div>
+          <div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div>
           <div className="roi-export-actions"><button onClick={exportPdf} className="roi-export-button pdf"><span>PDF</span>{c.pdf} <i>↓</i></button><button onClick={exportExcel} className="roi-export-button excel"><span>XLSX</span>{c.excel} <i>↓</i></button></div>
           {exportMessage && <p className="roi-export-message" role="status">{exportMessage}</p>}
         </div>
       </div>
       <div className="roi-disclaimer"><span>{c.note}</span><p>{c.disclaimer}</p></div>
       <div className="roi-pdf-export" ref={pdfRef} aria-hidden="true">
-        <header><div><span>OTM VALUE DRIVER LIBRARY</span><h1>{c.calculation}</h1></div><b>{date}</b></header>
+        <header><div><span>ONE ORACLE VALUE DRIVER LIBRARY</span><h1>{c.calculation}</h1></div><b>{date}</b></header>
         <section><span className="pdf-label">Selected value drivers / {selectedDrivers.length.toString().padStart(2, "0")}</span>{selectedDrivers.map((driver) => <div className="pdf-driver" key={driver.id}><b>{driver.id}</b><div><strong>{driver.title}</strong><span>{driver.statusLabel} · {driver.impact}</span></div><em>{currency.format(safeValue(driverValues[driver.id] ?? 0))}</em></div>)}</section>
         <section className="pdf-summary"><span className="pdf-label">ROI calculation</span><div><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong></div><div><span>{c.runCost}</span><strong>{currency.format(annualRunCost)}</strong></div><div><span>{c.implementation}</span><strong>{currency.format(implementationCost)}</strong></div><div className="pdf-highlight"><span>{c.roi}</span><strong>{roi.toFixed(1)}%</strong></div><div><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong></div></section>
         <footer>Evidence before assertion · Inputs must be validated before external commitment.</footer>

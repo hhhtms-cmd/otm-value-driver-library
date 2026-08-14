@@ -98,7 +98,7 @@ export default function Home() {
         </section>
 
         <section className="section-wrap section-anchor" id="library">
-          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / Value map</div><h2 className="section-heading">八个领域，一张可以复用的价值地图。</h2></div><p className="section-intro">一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。</p></div>
+          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / Value map</div><h2 className="section-heading">八个领域，一张可以复用的价值地图。</h2></div><div className="value-map-intro"><p className="section-intro">一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。</p><div className="evidence-legend" aria-label="证据状态说明"><span className="quantified">已量化</span><span className="pending">待量化</span><span className="directional">方向性</span><span className="extension">可选扩展</span></div></div></div>
           <div className="value-map" aria-label="OTM 价值领域列表">
             {DRIVERS.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`value-row ${driver.status} ${selectedId === driver.id ? "selected" : ""}`} aria-pressed={selectedId === driver.id}><span className="value-number">{driver.id}</span><div className="value-title">{driver.title}<span>{driver.english}</span></div><div className="value-description">{driver.description}</div><span className={`status-label ${driver.status}`}><b />{driver.statusLabel}</span><span className="row-arrow">→</span></button>)}
           </div>

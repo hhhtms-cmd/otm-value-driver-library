@@ -1,7 +1,7 @@
 /* Design reminder: "决策档案室" — this workspace is a calculation dossier, using evidence tabs, rulers, and restrained vermilion actions. */
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 type DriverOption = {
@@ -24,6 +24,16 @@ type ImportReport = {
   warnings: string[];
 };
 
+type RoiScenario = {
+  id: string;
+  name: string;
+  savedAt: string;
+  selectedIds: string[];
+  driverValues: Record<string, number>;
+  implementationCost: number;
+  annualRunCost: number;
+};
+
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const today = () => new Intl.DateTimeFormat("en-CA").format(new Date());
@@ -36,6 +46,15 @@ const numericValue = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 const fieldKey = (row: Record<string, unknown>, aliases: string[]) => Object.keys(row).find((key) => aliases.some((alias) => normalizeText(key) === normalizeText(alias)));
+const SCENARIO_STORAGE_KEY = "otm-value-driver-library.roi-scenarios.v1";
+const readStoredScenarios = (): RoiScenario[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(SCENARIO_STORAGE_KEY) ?? "[]") as unknown;
+    return Array.isArray(stored) ? stored.filter((item): item is RoiScenario => Boolean(item && typeof item === "object" && "id" in item && "name" in item)) : [];
+  } catch { return []; }
+};
+const scenarioStamp = (value: string) => new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 
 export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportWorkspaceProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(["04", "05"]);
@@ -44,6 +63,9 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const [annualRunCost, setAnnualRunCost] = useState(50000);
   const [exportMessage, setExportMessage] = useState("");
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
+  const [scenarios, setScenarios] = useState<RoiScenario[]>(readStoredScenarios);
+  const [scenarioName, setScenarioName] = useState("");
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,6 +76,17 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const roi = implementationCost > 0 ? (firstYearNetBenefit / implementationCost) * 100 : 0;
   const paybackMonths = netAnnualBenefit > 0 ? (implementationCost / netAnnualBenefit) * 12 : null;
   const date = today();
+  const activeScenario = scenarios.find((scenario) => scenario.id === activeScenarioId) ?? null;
+  const scenarioComparison = useMemo(() => scenarios.map((scenario) => {
+    const benefit = scenario.selectedIds.reduce((total, id) => total + safeValue(scenario.driverValues[id] ?? 0), 0);
+    const netBenefit = benefit - safeValue(scenario.annualRunCost);
+    const firstYear = benefit - safeValue(scenario.implementationCost) - safeValue(scenario.annualRunCost);
+    return { scenario, benefit, firstYear, roi: scenario.implementationCost > 0 ? (firstYear / scenario.implementationCost) * 100 : 0, payback: netBenefit > 0 ? (scenario.implementationCost / netBenefit) * 12 : null };
+  }), [scenarios]);
+
+  useEffect(() => {
+    try { window.localStorage.setItem(SCENARIO_STORAGE_KEY, JSON.stringify(scenarios)); } catch { /* The workspace remains usable when local storage is unavailable. */ }
+  }, [scenarios]);
 
   const updateMessage = (message: string) => {
     setExportMessage(message);
@@ -65,6 +98,40 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   };
 
   const setDriverValue = (id: string, value: number) => setDriverValues((current) => ({ ...current, [id]: safeValue(value) }));
+
+  const saveScenario = () => {
+    const name = scenarioName.trim() || `未命名情景 ${scenarios.length + 1}`;
+    const now = new Date().toISOString();
+    const snapshot: RoiScenario = { id: activeScenarioId ?? `scenario-${Date.now().toString(36)}`, name, savedAt: now, selectedIds: selectedIds.slice(), driverValues: { ...driverValues }, implementationCost: safeValue(implementationCost), annualRunCost: safeValue(annualRunCost) };
+    const isUpdate = Boolean(activeScenarioId && scenarios.some((scenario) => scenario.id === activeScenarioId));
+    setScenarios((current) => isUpdate ? current.map((scenario) => scenario.id === snapshot.id ? snapshot : scenario) : current.concat(snapshot));
+    setActiveScenarioId(snapshot.id);
+    setScenarioName(name);
+    updateMessage(isUpdate ? `“${name}” 已更新并保存在当前浏览器。` : `“${name}” 已保存，可在下方与其他情景并排比较。`);
+  };
+
+  const loadScenario = (scenario: RoiScenario) => {
+    setSelectedIds(scenario.selectedIds.slice());
+    setDriverValues({ ...scenario.driverValues });
+    setImplementationCost(safeValue(scenario.implementationCost));
+    setAnnualRunCost(safeValue(scenario.annualRunCost));
+    setScenarioName(scenario.name);
+    setActiveScenarioId(scenario.id);
+    updateMessage(`已载入“${scenario.name}”。ROI 工作区与后续导出将使用该情景。`);
+  };
+
+  const startNewScenario = () => {
+    setActiveScenarioId(null);
+    setScenarioName(scenarioName ? `${scenarioName} — 比较版` : "");
+    updateMessage("当前数值已保留；请命名后保存为新的独立情景。 ");
+  };
+
+  const removeScenario = (scenario: RoiScenario) => {
+    if (!window.confirm(`删除“${scenario.name}”？此操作只会移除本浏览器中保存的情景。`)) return;
+    setScenarios((current) => current.filter((item) => item.id !== scenario.id));
+    if (activeScenarioId === scenario.id) { setActiveScenarioId(null); setScenarioName(""); }
+    updateMessage(`“${scenario.name}” 已从本浏览器移除。`);
+  };
 
   const downloadTemplate = () => {
     const driverBaseline = drivers.map((driver) => ({
@@ -142,6 +209,7 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
         setDriverValues((current) => ({ ...current, ...importedValues }));
         setSelectedIds((current) => Array.from(new Set(current.concat(uniqueMatchedIds))));
       }
+      if (uniqueMatchedIds.length || updatedCosts.length) { setScenarioName(file.name.replace(/\.(xlsx|xls|csv)$/i, "")); setActiveScenarioId(null); }
       if (!uniqueMatchedIds.length && !updatedCosts.length) warnings.push("没有找到可识别的 Driver ID / Value Driver 或成本假设列。请使用下载的模板，或检查列名。 ");
       if (unmatchedRows) warnings.push(`${unmatchedRows} 行年度价值没有匹配到当前 Value Driver，未被写入。`);
       setImportReport({ filename: file.name, matchedDriverIds: uniqueMatchedIds, unmatchedRows, updatedCosts, warnings });
@@ -236,6 +304,11 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
         <div className="roi-import-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00 / Import baseline</span></div><h3>导入客户 Excel 基线，让假设自动就位。</h3><p>文件只在当前浏览器中读取，不会上传或保存到服务器。建议使用模板；系统也能识别此前导出的 Excel 工作簿中的标准字段。</p></div>
         <div className="roi-import-actions"><input ref={fileInputRef} id="baseline-upload" className="roi-file-input" type="file" accept=".xlsx,.xls,.csv" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBaseline(file); }} /><label className="roi-import-button primary" htmlFor="baseline-upload"><span>IMPORT</span>选择客户 Excel <i>↑</i></label><button className="roi-import-button" onClick={downloadTemplate}><span>TEMPLATE</span>下载空白模板 <i>↓</i></button></div>
         {importReport && <div className="roi-import-report"><div><b>导入复核</b><span>{importReport.filename}</span></div><p><strong>{importReport.matchedDriverIds.length}</strong> 个 driver 已预填{importReport.updatedCosts.length ? `；${importReport.updatedCosts.join("、")} 已更新` : ""}。</p>{importReport.warnings.map((warning) => <small key={warning}>{warning}</small>)}</div>}
+      </div>
+      <div className="roi-scenario-dossier">
+        <div className="roi-scenario-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00.1 / Save & compare</span></div><h3>将当前基线保存为情景，并并排审阅价值假设。</h3><p>情景只保存在当前浏览器。它包含已选 driver、年度价值及实施／运营成本，不会改变原始导入文件。</p></div>
+        <div className="roi-scenario-form"><label><span>Scenario name</span><input value={scenarioName} onChange={(event) => setScenarioName(event.target.value)} placeholder="例如：US 审计 + Visibility 基准" /></label>{activeScenario && <button className="roi-import-button" onClick={startNewScenario}><span>NEW</span>另存新情景 <i>↗</i></button>}<button className="roi-import-button primary" onClick={saveScenario}><span>{activeScenario ? "UPDATE" : "SAVE"}</span>{activeScenario ? "更新当前情景" : "保存当前情景"} <i>+</i></button></div>
+        {scenarioComparison.length > 0 ? <div className="roi-comparison-grid"><div className="roi-comparison-heading"><span>Saved scenario register</span><b>{number.format(scenarioComparison.length).padStart(2, "0")} saved</b></div>{scenarioComparison.map(({ scenario, benefit, firstYear, roi: scenarioRoi, payback }) => <article className={`roi-scenario-card ${activeScenarioId === scenario.id ? "active" : ""}`} key={scenario.id}><div className="scenario-card-top"><div><span>SCENARIO / {scenarioStamp(scenario.savedAt)}</span><h4>{scenario.name}</h4></div><i>{activeScenarioId === scenario.id ? "当前" : "已存"}</i></div><div className="scenario-card-metrics"><div><span>年度收益</span><strong>{currency.format(benefit)}</strong></div><div><span>首年 ROI</span><strong>{scenarioRoi.toFixed(1)}%</strong></div><div><span>回收期</span><strong>{payback ? `${payback.toFixed(1)}月` : "—"}</strong></div></div><p>首年净收益 {currency.format(firstYear)} · {scenario.selectedIds.length} 个 driver</p><div className="scenario-card-actions"><button onClick={() => loadScenario(scenario)}>载入</button><button onClick={() => removeScenario(scenario)}>删除</button></div></article>)}</div> : <div className="roi-empty-scenario"><span>SCENARIO REGISTER / EMPTY</span><p>导入或编辑假设后，为当前基线命名并保存，即可在此建立并排的 ROI 比较。</p></div>}
       </div>
       <div className="roi-workspace">
         <div className="roi-selection-panel">

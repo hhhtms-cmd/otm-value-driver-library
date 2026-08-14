@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { isHardRoiGate, type EvidenceGate } from "@/lib/evidence";
 import type { Driver } from "@/lib/oneOracleDrivers";
+import ExecutivePptExport from "@/components/ExecutivePptExport";
 import "./layered-workflow.css";
 
 type DriverOption = Pick<Driver, "id" | "family" | "title" | "english" | "status" | "statusLabel" | "impact" | "kpis" | "formula">;
@@ -378,7 +379,7 @@ export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceG
           <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(baseNetAnnualBenefit)}</small></div>
           <div className="roi-formula"><b>Formula / First-year ROI</b><span>{c.formula}</span></div>
           <div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div>
-          <div className="roi-export-actions"><button onClick={exportPdf} className="roi-export-button pdf"><span>PDF</span>{c.pdf} <i>↓</i></button><button onClick={exportExcel} className="roi-export-button excel"><span>XLSX</span>{c.excel} <i>↓</i></button></div>
+          <div className="roi-export-actions"><ExecutivePptExport language={language} baseDrivers={baseDrivers} opportunityDrivers={selectedDrivers.filter((driver) => !isHardRoiGate(evidenceGates[driver.id]))} baseBenefit={baseBenefit} opportunityBenefit={opportunityBenefit} implementationCost={implementationCost} annualRunCost={annualRunCost} firstYearNetBenefit={firstYearNetBenefit} roi={roi} paybackMonths={paybackMonths} overlapAlert={potentialOverlap} reportDate={date} onStatus={updateMessage} /><button onClick={exportPdf} className="roi-export-button pdf"><span>PDF</span>{c.pdf} <i>↓</i></button><button onClick={exportExcel} className="roi-export-button excel"><span>XLSX</span>{c.excel} <i>↓</i></button></div>
           {exportMessage && <p className="roi-export-message" role="status">{exportMessage}</p>}
         </div>
       </div>

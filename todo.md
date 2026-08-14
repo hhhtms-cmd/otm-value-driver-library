@@ -49,3 +49,6 @@
 - [x] 将客户协作字段与 ROI 工作区输入建立可追溯映射。
 - [x] 更新 Excel 模型，加入 Discovery、Evidence Register、E2/E3 硬门控与输出链路。
 - [x] 验证 Dashboard/Excel 的分层衔接、公式控制和交付文件质量。
+- [x] 定义客户版 PPT 的已验证 Base ROI、范围、TCO、证据与决策内容结构。
+- [x] 实现浏览器端 PowerPoint 生成器与 Executive Output 导出入口。
+- [x] 验证下载的 PPT 内容、门控规则和中英西界面兼容性。

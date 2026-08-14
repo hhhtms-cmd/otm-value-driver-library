@@ -85,10 +85,12 @@ export default function Home() {
           <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="抽象物流价值链档案视觉" />
           <div className="hero-grid" />
           <div className="hero-dossier-frame" aria-hidden="true"><span>FILE / OTM-VDL-01</span><span>DECISION DOSSIER</span><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /></div>
+          <div className="hero-margin-file" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>CASE FILE</span><b>01</b><i>US / Audit + Visibility</i></div>
           <div className="hero-content">
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
-            <h1>从运输信号，走向<br /><em>可验证的</em>价值路径。</h1>
-            <p className="hero-copy">把 OTM 能力、客户数据、ROI 方法和决策叙事组织成按需组装的模块库，而不是一次性的售前文档。</p>
+            <div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div>
+            <h1>从运输信号，建立<br /><em>可验证的</em>价值档案。</h1>
+            <p className="hero-copy">以 OTM 能力、客户数据、ROI 方法和决策叙事构成一条有证据、可回溯、可组装的价值路径。</p>
             <div className="hero-causal-rail" aria-label="价值因果路径"><span>痛点</span><b>01</b><span>能力</span><b>02</b><span>变量</span><b>03</b><span>KPI</span><b>04</b><span>价值</span></div>
             <div className="hero-actions"><a className="button-archive" href="#library">检索价值档案 <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>验证当前证据 <span>↗</span></button></div>
           </div>
@@ -96,7 +98,7 @@ export default function Home() {
         </section>
 
         <section className="section-wrap section-anchor" id="library">
-          <div className="section-lead"><div><div className="eyebrow">01 / Value map</div><h2 className="section-heading">八个领域，一张可以复用的价值地图。</h2></div><p className="section-intro">一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。</p></div>
+          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / Value map</div><h2 className="section-heading">八个领域，一张可以复用的价值地图。</h2></div><p className="section-intro">一级分类按价值实现路径而非产品菜单构建。每个领域都可展开为独立的诊断、数据、ROI 和叙事模块。</p></div>
           <div className="value-map" aria-label="OTM 价值领域列表">
             {DRIVERS.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`value-row ${driver.status} ${selectedId === driver.id ? "selected" : ""}`} aria-pressed={selectedId === driver.id}><span className="value-number">{driver.id}</span><div className="value-title">{driver.title}<span>{driver.english}</span></div><div className="value-description">{driver.description}</div><span className={`status-label ${driver.status}`}><b />{driver.statusLabel}</span><span className="row-arrow">→</span></button>)}
           </div>
@@ -107,7 +109,7 @@ export default function Home() {
         </section>
 
         <section className="view-section section-wrap section-anchor" id="views">
-          <div className="view-layout"><div className="view-statement"><div className="eyebrow">02 / Same evidence, different view</div><h2>一次维护，三种决策视图。</h2><p>不从头建立客户版与内部版。每张 driver 卡都是唯一事实源，只按读者改变展示深度。</p><div className="view-toggle">{(Object.keys(VIEWS) as Array<keyof typeof VIEWS>).map((key) => <button key={key} onClick={() => setActiveView(key)} className={activeView === key ? "active" : ""}>{VIEWS[key].label}</button>)}</div></div>
+          <div className="view-layout"><div className="view-statement"><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />02 / Same evidence, different view</div><h2>一次维护，三种决策视图。</h2><p>不从头建立客户版与内部版。每张 driver 卡都是唯一事实源，只按读者改变展示深度。</p><div className="view-toggle">{(Object.keys(VIEWS) as Array<keyof typeof VIEWS>).map((key) => <button key={key} onClick={() => setActiveView(key)} className={activeView === key ? "active" : ""}>{VIEWS[key].label}</button>)}</div></div>
             <article className="view-card"><div className="view-card-head"><span>{view.code}</span><span>{view.label}</span></div><div className="view-card-body"><h3>{view.title}</h3><p>{view.copy}</p><div className="evidence-list">{view.items.map(([title, description, status]) => <div className={`evidence-item ${status}`} key={title}><i /><div><strong>{title}</strong><span>{description}</span></div></div>)}</div></div></article>
           </div>
         </section>
@@ -120,7 +122,7 @@ export default function Home() {
         <RoiExportWorkspace drivers={DRIVERS} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
 
         <section className="narrative-section section-wrap section-anchor" id="narrative">
-          <div className="section-lead"><div><div className="eyebrow">04 / Narrative scaffold</div><h2 className="section-heading">用证据状态管理范围，而不是用全部能力堆叠范围。</h2></div><p className="section-intro">每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。</p></div>
+          <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />04 / Narrative scaffold</div><h2 className="section-heading">用证据状态管理范围，而不是用全部能力堆叠范围。</h2></div><p className="section-intro">每一个新增诉求必须进入既定 driver 卡，并明确其证据层级、数据条件和决策门槛。</p></div>
           <div className="narrative-grid"><div className="narrative-steps"><div className="narrative-step"><span className="step-number">LAYER / 1</span><div><h3>已验证的核心价值</h3><p>US freight audit 与 visibility 的直接价值闭环；使用基线、范围、去重规则和敏感性表达。</p></div><span className="step-tag">Hard ROI</span></div><div className="narrative-step"><span className="step-number">LAYER / 2</span><div><h3>有证据、待量化的扩展价值</h3><p>Europe 的相同 driver 或相邻机会；说明诊断和验证计划，不承诺具体金额。</p></div><span className="step-tag">Validate</span></div><div className="narrative-step"><span className="step-number">LAYER / 3</span><div><h3>战略路线图选项</h3><p>网络建模、车队、可持续性或更广 Oracle 能力；保留给独立的范围确认和商业案例。</p></div><span className="step-tag">Roadmap</span></div></div><div className="narrative-art"><img src={assetUrl("/manus-storage/otm-narrative-layers_d2d229db.jpg")} alt="分层商业案例叙事的抽象档案视觉" /></div></div>
         </section>
 

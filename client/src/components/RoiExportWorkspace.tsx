@@ -16,10 +16,26 @@ type DriverOption = {
 
 type RoiExportWorkspaceProps = { drivers: DriverOption[]; brandMarkSrc: string };
 
+type ImportReport = {
+  filename: string;
+  matchedDriverIds: string[];
+  unmatchedRows: number;
+  updatedCosts: string[];
+  warnings: string[];
+};
+
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const today = () => new Intl.DateTimeFormat("en-CA").format(new Date());
 const safeValue = (value: number) => Number.isFinite(value) ? Math.max(0, value) : 0;
+const normalizeText = (value: unknown) => String(value ?? "").toLocaleLowerCase().replace(/[\s_\-–—()./\\%$￥¥,:：]/g, "");
+const numericValue = (value: unknown) => {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  const cleaned = String(value ?? "").replace(/[,$￥¥\s]/g, "");
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+const fieldKey = (row: Record<string, unknown>, aliases: string[]) => Object.keys(row).find((key) => aliases.some((alias) => normalizeText(key) === normalizeText(alias)));
 
 export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportWorkspaceProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(["04", "05"]);
@@ -27,7 +43,9 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   const [implementationCost, setImplementationCost] = useState(190000);
   const [annualRunCost, setAnnualRunCost] = useState(50000);
   const [exportMessage, setExportMessage] = useState("");
+  const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedDrivers = useMemo(() => drivers.filter((driver) => selectedIds.includes(driver.id)), [drivers, selectedIds]);
   const totalBenefit = useMemo(() => selectedDrivers.reduce((total, driver) => total + safeValue(driverValues[driver.id] ?? 0), 0), [driverValues, selectedDrivers]);
@@ -47,6 +65,94 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   };
 
   const setDriverValue = (id: string, value: number) => setDriverValues((current) => ({ ...current, [id]: safeValue(value) }));
+
+  const downloadTemplate = () => {
+    const driverBaseline = drivers.map((driver) => ({
+      "Driver ID": driver.id,
+      "Value Driver": driver.title,
+      "Annual Benefit (USD)": "",
+      "Evidence Notes": "",
+    }));
+    const costAssumptions = [
+      { "Assumption": "One-time implementation cost", "Value": "", "Unit": "USD" },
+      { "Assumption": "Annual operating cost", "Value": "", "Unit": "USD" },
+    ];
+    const workbook = XLSX.utils.book_new();
+    const driverSheet = XLSX.utils.json_to_sheet(driverBaseline);
+    const costSheet = XLSX.utils.json_to_sheet(costAssumptions);
+    driverSheet["!cols"] = [{ wch: 12 }, { wch: 42 }, { wch: 24 }, { wch: 30 }];
+    costSheet["!cols"] = [{ wch: 34 }, { wch: 18 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(workbook, driverSheet, "Driver Baseline");
+    XLSX.utils.book_append_sheet(workbook, costSheet, "Cost Assumptions");
+    XLSX.writeFile(workbook, "otm-roi-baseline-template.xlsx", { compression: true });
+    updateMessage("空白基线模板已开始下载。请填写年度价值与成本后再导入。 ");
+  };
+
+  const importBaseline = async (file: File) => {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    if (!extension || !["xlsx", "xls", "csv"].includes(extension)) { updateMessage("请选择 .xlsx、.xls 或 .csv 格式的 Excel 基线文件。 "); return; }
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheets = workbook.SheetNames.map((sheetName) => ({
+        name: sheetName,
+        rows: XLSX.utils.sheet_to_json<Record<string, unknown>>(workbook.Sheets[sheetName], { defval: "" }),
+      }));
+      const importedValues: Record<string, number> = {};
+      const matchedDriverIds: string[] = [];
+      const warnings: string[] = [];
+      let unmatchedRows = 0;
+      let importedImplementationCost: number | null = null;
+      let importedAnnualRunCost: number | null = null;
+
+      sheets.forEach(({ rows }) => {
+        if (!rows.length) return;
+        const idKey = fieldKey(rows[0], ["Driver ID", "Value Driver ID", "价值驱动编号", "驱动因素编号"]);
+        const nameKey = fieldKey(rows[0], ["Value Driver", "Driver Name", "价值驱动因素", "价值驱动名称"]);
+        const benefitKey = fieldKey(rows[0], ["Annual Benefit (USD)", "Annual Benefit", "Annual Value", "年度价值", "年度价值（USD）"]);
+        if (benefitKey && (idKey || nameKey)) {
+          rows.forEach((row) => {
+            const id = String(idKey ? row[idKey] : "").padStart(2, "0");
+            const name = String(nameKey ? row[nameKey] : "");
+            const driver = drivers.find((item) => item.id === id) ?? drivers.find((item) => normalizeText(item.title) === normalizeText(name) || normalizeText(item.english) === normalizeText(name));
+            const value = numericValue(row[benefitKey]);
+            if (driver && value !== null) { importedValues[driver.id] = safeValue(value); matchedDriverIds.push(driver.id); }
+            else if (value !== null) unmatchedRows += 1;
+          });
+        }
+
+        const assumptionKey = fieldKey(rows[0], ["Assumption", "Metric", "假设", "指标"]);
+        const valueKey = fieldKey(rows[0], ["Value", "Value (USD / %)", "金额", "数值"]);
+        if (assumptionKey && valueKey) {
+          rows.forEach((row) => {
+            const label = normalizeText(row[assumptionKey]);
+            const value = numericValue(row[valueKey]);
+            if (value === null) return;
+            if (["onetimeimplementationcost", "implementationcost", "一次性实施成本", "实施成本"].some((item) => label.includes(normalizeText(item)))) importedImplementationCost = safeValue(value);
+            if (["annualoperatingcost", "annualruncost", "年度运营成本", "运营成本"].some((item) => label.includes(normalizeText(item)))) importedAnnualRunCost = safeValue(value);
+          });
+        }
+      });
+
+      const uniqueMatchedIds = Array.from(new Set(matchedDriverIds));
+      const updatedCosts: string[] = [];
+      if (importedImplementationCost !== null) { setImplementationCost(importedImplementationCost); updatedCosts.push("一次性实施成本"); }
+      if (importedAnnualRunCost !== null) { setAnnualRunCost(importedAnnualRunCost); updatedCosts.push("年度运营成本"); }
+      if (uniqueMatchedIds.length) {
+        setDriverValues((current) => ({ ...current, ...importedValues }));
+        setSelectedIds((current) => Array.from(new Set(current.concat(uniqueMatchedIds))));
+      }
+      if (!uniqueMatchedIds.length && !updatedCosts.length) warnings.push("没有找到可识别的 Driver ID / Value Driver 或成本假设列。请使用下载的模板，或检查列名。 ");
+      if (unmatchedRows) warnings.push(`${unmatchedRows} 行年度价值没有匹配到当前 Value Driver，未被写入。`);
+      setImportReport({ filename: file.name, matchedDriverIds: uniqueMatchedIds, unmatchedRows, updatedCosts, warnings });
+      updateMessage(uniqueMatchedIds.length || updatedCosts.length ? "基线数据已导入并预填到 ROI 工作区，请复核高亮字段。" : "已读取文件，但未找到可预填的字段。 ");
+    } catch {
+      setImportReport({ filename: file.name, matchedDriverIds: [], unmatchedRows: 0, updatedCosts: [], warnings: ["文件无法读取。请确认它不是受密码保护的 Excel 文件，并尝试重新导出为 .xlsx。"] });
+      updateMessage("Excel 文件未能读取，请查看导入复核提示。 ");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const exportExcel = () => {
     if (!selectedDrivers.length) { updateMessage("请至少选择一个价值驱动因素后再导出。"); return; }
@@ -126,6 +232,11 @@ export default function RoiExportWorkspace({ drivers, brandMarkSrc }: RoiExportW
   return (
     <section className="roi-export-section section-wrap section-anchor" id="roi-export">
       <div className="section-lead"><div><div className="eyebrow">04 / ROI export workspace</div><h2 className="section-heading">把已选择的证据，带进可下载的商业案例。</h2></div><p className="section-intro">选择相关 driver，录入年度价值与成本假设。网站会即时计算首年 ROI 与回收期，并生成 PDF 或 Excel 摘要。</p></div>
+      <div className="roi-import-dossier">
+        <div className="roi-import-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00 / Import baseline</span></div><h3>导入客户 Excel 基线，让假设自动就位。</h3><p>文件只在当前浏览器中读取，不会上传或保存到服务器。建议使用模板；系统也能识别此前导出的 Excel 工作簿中的标准字段。</p></div>
+        <div className="roi-import-actions"><input ref={fileInputRef} id="baseline-upload" className="roi-file-input" type="file" accept=".xlsx,.xls,.csv" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBaseline(file); }} /><label className="roi-import-button primary" htmlFor="baseline-upload"><span>IMPORT</span>选择客户 Excel <i>↑</i></label><button className="roi-import-button" onClick={downloadTemplate}><span>TEMPLATE</span>下载空白模板 <i>↓</i></button></div>
+        {importReport && <div className="roi-import-report"><div><b>导入复核</b><span>{importReport.filename}</span></div><p><strong>{importReport.matchedDriverIds.length}</strong> 个 driver 已预填{importReport.updatedCosts.length ? `；${importReport.updatedCosts.join("、")} 已更新` : ""}。</p>{importReport.warnings.map((warning) => <small key={warning}>{warning}</small>)}</div>}
+      </div>
       <div className="roi-workspace">
         <div className="roi-selection-panel">
           <div className="roi-panel-heading"><div><span>01 / Select evidence</span><h3>选择价值驱动因素</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedDrivers.length.toString().padStart(2, "0")} / 08</b></div></div>

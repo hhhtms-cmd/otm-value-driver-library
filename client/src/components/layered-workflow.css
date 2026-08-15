@@ -27,5 +27,5 @@
 .simple-result-mark { color: #d84a36; font-family: "DM Serif Display",Georgia,serif; font-size: 33px; line-height: 1; }
 .simple-result h3 { color: #fffaf2; font-size: clamp(25px,2.6vw,34px); }
 .simple-result p { margin: 16px 0 0; border-top: 1px solid rgba(255,250,242,.22); padding-top: 12px; color: #c6c1b9; font-size: 11px; line-height: 1.65; }
-.simple-result button { font-family: "IBM Plex Mono",monospace; font-size: 8px; letter-spacing: .06em; }.simple-save { display: block; margin-top: 17px; border: 1px solid #d84a36; background: #d84a36; color: #fffaf2; padding: 9px 10px; }.simple-reset { margin-top: 12px; border: 0; border-bottom: 1px solid #efc7bb; background: transparent; color: #efc7bb; padding: 0 0 4px; }
+.simple-result button { margin-top: 17px; border: 0; border-bottom: 1px solid #efc7bb; background: transparent; color: #efc7bb; padding: 0 0 4px; font-family: "IBM Plex Mono",monospace; font-size: 8px; letter-spacing: .06em; }
 @media (max-width: 760px) { .simple-workflow { grid-template-columns: 1fr; }.simple-next-panel { border-top: 1px solid #d8d0c3; border-left: 0; }.simple-topic-panel,.simple-next-panel { padding: 24px; }.simple-answer-grid { grid-template-columns: 1fr; }.simple-question h3,.simple-result h3 { font-size: 31px; }.simple-empty,.simple-result { min-height: 175px; } }

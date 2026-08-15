@@ -1,10 +1,19 @@
 /* Design reminder: “Decision Archive” — preserve the warm editorial archive, but let a customer solve one question at a time. */
 import { useEffect, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import type { EvidenceGate } from "@/lib/evidence";
+import type { Driver } from "@/lib/oneOracleDrivers";
 import "./layered-workflow.css";
 
 type WorkflowFocus = "optimization" | "audit" | "visibility";
-type WorkflowProps = { brandMarkSrc: string; runwayFocus?: WorkflowFocus };
+type WorkflowProps = {
+  drivers: Driver[];
+  evidenceGates: Record<string, EvidenceGate>;
+  onEvidenceGateChange: (driverId: string, gate: EvidenceGate) => void;
+  brandMarkSrc: string;
+  onSelectDriver: (id: string) => void;
+  runwayFocus?: WorkflowFocus;
+};
 
 type Topic = { tab: string; question: string; answers: [string, string]; next: [string, string] };
 type Copy = { kicker: string; title: string; intro: string; choose: string; questionLabel: string; nextLabel: string; reset: string; topics: Record<WorkflowFocus, Topic> };
@@ -36,23 +45,17 @@ const COPY: Record<Language, Copy> = {
   }
 };
 
-export default function AssessmentWorkflow({ brandMarkSrc, runwayFocus }: WorkflowProps) {
+const DRIVER_ID: Record<WorkflowFocus, string> = { optimization: "01", audit: "04", visibility: "05" };
+
+export default function AssessmentWorkflow({ brandMarkSrc, onSelectDriver, runwayFocus }: WorkflowProps) {
   const { language } = useLanguage();
   const c = COPY[language];
   const [focus, setFocus] = useState<WorkflowFocus>("optimization");
   const [answer, setAnswer] = useState<number | null>(null);
-  const [saved, setSaved] = useState(false);
   const topic = c.topics[focus];
 
   useEffect(() => { if (runwayFocus) { setFocus(runwayFocus); setAnswer(null); } }, [runwayFocus]);
-  const chooseTopic = (next: WorkflowFocus) => { setFocus(next); setAnswer(null); setSaved(false); };
-  const saveBrief = () => {
-    if (answer === null) return;
-    const key = "otm-team-discussion-briefs";
-    const entry = { topic: topic.tab, question: topic.question, answer: topic.answers[answer], next: topic.next[answer], savedAt: new Date().toISOString() };
-    try { const current = JSON.parse(localStorage.getItem(key) ?? "[]"); localStorage.setItem(key, JSON.stringify([entry, ...current].slice(0, 12))); } catch { localStorage.setItem(key, JSON.stringify([entry])); }
-    setSaved(true);
-  };
+  const chooseTopic = (next: WorkflowFocus) => { setFocus(next); setAnswer(null); onSelectDriver(DRIVER_ID[next]); };
 
   return <section className="assessment-workflow section-wrap section-anchor" id="workflow">
     <div className="section-lead">
@@ -69,7 +72,7 @@ export default function AssessmentWorkflow({ brandMarkSrc, runwayFocus }: Workfl
       </div>
       <div className="simple-next-panel" id="evidence-gate">
         <span className="simple-label">{c.nextLabel}</span>
-        {answer === null ? <div className="simple-empty"><p>←</p><strong>{language === "zh" ? "先选一个答案。" : language === "es" ? "Elija una respuesta primero." : "Choose one answer first."}</strong><span>{language === "zh" ? "系统会把复杂的下一步，变成一句你可以马上去做的话。" : language === "es" ? "Convertiremos el siguiente paso complejo en una frase que puede aplicar de inmediato." : "We will turn the complex next step into one sentence you can act on immediately."}</span></div> : <div className="simple-result"><div className="simple-result-mark">→</div><h3>{topic.next[answer]}</h3><p>{language === "zh" ? "这一步做完后，再决定是否值得继续深入。" : language === "es" ? "Cuando termine este paso, decida si vale la pena profundizar." : "After this step, decide whether a deeper exploration is worthwhile."}</p><button className="simple-save" onClick={saveBrief}>{saved ? (language === "zh" ? "讨论清单已保存" : language === "es" ? "Resumen guardado" : "Discussion brief saved") : (language === "zh" ? "保存为团队讨论清单" : language === "es" ? "Guardar como resumen de equipo" : "Save as team discussion brief")}</button><button className="simple-reset" onClick={() => { setAnswer(null); setSaved(false); }}>{c.reset}</button></div>}
+        {answer === null ? <div className="simple-empty"><p>←</p><strong>{language === "zh" ? "先选一个答案。" : language === "es" ? "Elija una respuesta primero." : "Choose one answer first."}</strong><span>{language === "zh" ? "系统会把复杂的下一步，变成一句你可以马上去做的话。" : language === "es" ? "Convertiremos el siguiente paso complejo en una frase que puede aplicar de inmediato." : "We will turn the complex next step into one sentence you can act on immediately."}</span></div> : <div className="simple-result"><div className="simple-result-mark">→</div><h3>{topic.next[answer]}</h3><p>{language === "zh" ? "这一步做完后，再决定是否值得继续深入。" : language === "es" ? "Cuando termine este paso, decida si vale la pena profundizar." : "After this step, decide whether a deeper exploration is worthwhile."}</p><button onClick={() => setAnswer(null)}>{c.reset}</button></div>}
       </div>
     </div>
   </section>;

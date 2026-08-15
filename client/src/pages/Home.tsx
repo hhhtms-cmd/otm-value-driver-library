@@ -116,7 +116,7 @@ export default function Home() {
           </div>
         </section>
 
-        <AssessmentWorkflow brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} runwayFocus={runwayPath === "optimization" ? "optimization" : runwayPath === "visibility" ? "visibility" : runwayPath === "audit" ? "audit" : undefined} />
+        <AssessmentWorkflow brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} runwayFocus={runwayPath === "optimization" ? "optimization" : runwayPath === "visibility" ? "visibility" : runwayPath === "audit" ? "audit" : undefined} onOpenAdvanced={() => openAdvanced()} />
         <section className="deep-entry section-wrap"><div><div className="eyebrow">{simpleCopy.deepNote}</div><h2>{simpleCopy.deeperTitle}</h2><p>{simpleCopy.deeperCopy}</p></div><button type="button" onClick={() => openAdvanced()}>{simpleCopy.deeper} <span>↗</span></button></section>
         {advancedOpen && <div className="advanced-workbench" id="advanced-tools"><div className="deep-mode-bar"><span>{simpleCopy.deepNote}</span><button type="button" onClick={() => { setAdvancedOpen(false); window.setTimeout(() => scrollToId("workflow"), 10); }}>← {simpleCopy.returnSimple}</button></div><AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onOpenGtmModule={openGtmModule} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
 

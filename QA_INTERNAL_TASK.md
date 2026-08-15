@@ -13,3 +13,7 @@ The task copy was checked in Spanish and Chinese. The task stores selections usi
 ## Boundary verified
 
 The first task does not ask the user to make an Evidence Gate or ROI decision. Those activities remain accessible later in the Decision Archive, after the initial customer work session has been prepared.
+
+## Default entry routing
+
+The root URL now loads the Decision Archive / Internal Workbench by default. The workbench retains a visible “客户探索入口” link to `/client-brief`, where the customer-oriented six-signal exploration flow remains available as a separate experience.

@@ -17,3 +17,13 @@ The first task does not ask the user to make an Evidence Gate or ROI decision. T
 ## Default entry routing
 
 The root URL now loads the Decision Archive / Internal Workbench by default. The workbench retains a visible “客户探索入口” link to `/client-brief`, where the customer-oriented six-signal exploration flow remains available as a separate experience.
+
+## Customer self-service correction
+
+The Decision Archive is now narrated for the person assessing their own transport operation. Visible workbench language uses **your question**, **your information**, **your colleagues**, and **your discussion brief** rather than referring to the user as a customer or assuming a presales/consulting role.
+
+The Freight Audit task now produces a **Freight Audit Discussion Brief** for the user’s own internal team. Its three steps ask the user to select the issue they want to clarify, identify information inside their team, and involve colleagues who know the process, payments, or systems trail. Browser verification confirmed the task opens after the user selects the Freight Audit path and re-renders correctly in Chinese.
+
+## Responsive visual check
+
+Desktop and 390px-wide mobile screenshots were reviewed after the language change. The Decision Archive hero, customer-first headline, primary exploration action, and the first path starter remain legible without text overlap. The mobile composition preserves the archive style while placing the customer’s next action within the first screen.

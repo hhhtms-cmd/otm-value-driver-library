@@ -64,7 +64,13 @@ const ROI_COPY: Record<Language, Record<string, string>> = {
 
 export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceGateChange, brandMarkSrc }: RoiExportWorkspaceProps) {
   const { language } = useLanguage();
-  const c = ROI_COPY[language];
+  const c: Record<string, string> = {
+    ...ROI_COPY[language],
+    title: language === "zh" ? "把你已确认的资料，带进可下载的价值讨论摘要。" : language === "es" ? "Convierta la información que ha confirmado en un resumen descargable para discutir valor." : "Turn the information you have confirmed into a downloadable value discussion summary.",
+    intro: language === "zh" ? "选择相关 OTM/GTM driver，录入你自己的年度价值与成本假设。系统会即时计算首年 ROI 与回收期，并生成 PDF 或 Excel 摘要。" : language === "es" ? "Seleccione drivers OTM/GTM e introduzca sus propios supuestos de valor anual y coste. El espacio calcula ROI y recuperación del primer año, y genera un resumen PDF o Excel." : "Select relevant OTM/GTM drivers and enter your own annual-value and cost assumptions. The workspace calculates first-year ROI and payback, then produces a PDF or Excel summary.",
+    importTitle: language === "zh" ? "导入你的 Excel 基线，让假设自动就位。" : language === "es" ? "Importe su línea base Excel y haga que los supuestos encajen." : "Import your Excel baseline and let assumptions fall into place.",
+    choose: language === "zh" ? "选择你的 Excel" : language === "es" ? "Elegir su Excel" : "Choose your Excel",
+  };
   const layer = LAYER_COPY[language];
   const locale = language === "zh" ? "zh-CN" : language === "es" ? "es-ES" : "en-US";
   const currency = useMemo(() => new Intl.NumberFormat(locale, { style: "currency", currency: "USD", maximumFractionDigits: 0 }), [locale]);

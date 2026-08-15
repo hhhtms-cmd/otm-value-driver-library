@@ -91,7 +91,7 @@ export default function Home() {
           <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="Abstract transportation value evidence archive" />
           <div className="hero-grid" />
           <div className="hero-content">
-            <div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>FILE / OO-VDL-001</span><b>DECISION EVIDENCE</b><i>OTM ↔ GTM</i></div>
+            <div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><b>DECISION EVIDENCE</b><i>OTM ↔ GTM</i></div>
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
             <div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div>
             <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>

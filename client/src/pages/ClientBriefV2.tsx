@@ -1,5 +1,6 @@
 /* Design reminder: “Cobalt Field Guide” — a premium OTM exploration route, not a sales landing page or scorecard. Use Cobalt Route Blue only for paths, selection, and the one clear next action. */
 import { useEffect, useMemo, useState } from "react";
+/* Design reminder: “Cobalt Field Guide” — a customer-completable exploration route. One calm action at a time; never expose internal ROI, Evidence Gate, or workbench navigation as customer tasks. */
 import { ArrowLeft, ArrowRight, Check, Clipboard, Download, RotateCcw } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
@@ -10,9 +11,11 @@ type Answers = Partial<Record<QuestionId, Answer>>;
 type QuestionId = "need" | "scope" | "systems" | "data" | "team" | "explore";
 type SignalKey = "need" | "foundation" | "mobilisation";
 type Screen = "start" | "question" | "result";
+type FocusKey = "audit" | "visibility" | "other";
 
 type Question = { id: QuestionId; prompt: string; helper: string; routeLabel: string };
 type Signal = { key: SignalKey; label: string; note: string; conditions: [string, string] };
+type FocusOption = { id: FocusKey; title: string; detail: string; bring: string };
 type Copy = {
   brand: string;
   oldVersion: string;
@@ -23,6 +26,12 @@ type Copy = {
   intro: string;
   start: string;
   startNote: string;
+  startPickKicker: string;
+  startPickTitle: string;
+  startUnsure: string;
+  focusOptions: FocusOption[];
+  startingPoint: string;
+  bringLabel: string;
   routeKicker: string;
   routeTitle: string;
   routeSteps: [string, string, string];
@@ -74,6 +83,13 @@ const COPY: Record<Language, Copy> = {
     intro: "Six plain-language questions bring one transport reality into focus—before you spend time on a larger evaluation.",
     start: "Map my starting point",
     startNote: "No ROI claim. No product recommendation. Just a clearer next conversation.",
+    startPickKicker: "START WITH THE CLOSEST REALITY", startPickTitle: "What would you most like to make clearer?", startUnsure: "I am not sure yet — start with the general questions",
+    focusOptions: [
+      { id: "audit", title: "Freight bills and spend", detail: "There may be questions around invoices, charges, rates, payments or spend control.", bring: "Bring one recent invoice, rate question, or a simple description of how freight bills are checked today." },
+      { id: "visibility", title: "Visibility and exceptions", detail: "There may be questions around shipment status, delays, escalation, service or manual chasing.", bring: "Bring one recent delay, expedite, status-chasing example, or description of how exceptions are handled." },
+      { id: "other", title: "Another transport or trade question", detail: "The first conversation may concern planning, carriers, network, compliance or trade operations.", bring: "Bring one concrete process example and the name of the person who understands it best." },
+    ],
+    startingPoint: "YOUR STARTING POINT", bringLabel: "BRING TO THE CONVERSATION",
     routeKicker: "YOUR EXPLORATION ROUTE",
     routeTitle: "One route. Three signals.",
     routeSteps: ["A real operating need", "A visible digital foundation", "The ability to mobilise a small next step"],
@@ -134,6 +150,13 @@ const COPY: Record<Language, Copy> = {
     intro: "回答六个大白话问题，把一个真实的运输场景带到焦点中，再决定是否值得投入更大的评估。",
     start: "绘制我的起点地图",
     startNote: "不计算 ROI，不推荐产品，只让下一次对话更清楚。",
+    startPickKicker: "从最接近的真实情况开始", startPickTitle: "你现在最想把哪件事讲清楚？", startUnsure: "我还不确定，先从通用问题开始",
+    focusOptions: [
+      { id: "audit", title: "运费账单与支出", detail: "团队可能正在处理发票、收费、费率、付款或支出控制方面的问题。", bring: "带来一张近期账单、一个费率问题，或简单说明今天如何审核货运账单。" },
+      { id: "visibility", title: "可视化与异常", detail: "团队可能正在处理运输状态、延误、升级处理、服务或人工追踪方面的问题。", bring: "带来一个近期延误、加急、状态追踪案例，或说明今天如何处理例外。" },
+      { id: "other", title: "其他运输或贸易问题", detail: "第一次对话可能涉及规划、承运商、网络、合规或贸易运营。", bring: "带来一个具体流程案例，以及最了解该流程的人员姓名。" },
+    ],
+    startingPoint: "你的探索起点", bringLabel: "下一次对话请带来",
     routeKicker: "你的探索路线",
     routeTitle: "一条路线，三个信号。",
     routeSteps: ["一个真实的运营需求", "一条看得见的数字基础", "推进一个小步骤的能力"],
@@ -194,6 +217,13 @@ const COPY: Record<Language, Copy> = {
     intro: "Seis preguntas en lenguaje sencillo enfocan una realidad de transporte antes de invertir tiempo en una evaluación mayor.",
     start: "Trazar mi punto de partida",
     startNote: "Sin cálculo de ROI. Sin recomendación de producto. Solo una próxima conversación más clara.",
+    startPickKicker: "EMPIECE POR LA REALIDAD MÁS CERCANA", startPickTitle: "¿Qué le gustaría aclarar primero?", startUnsure: "Aún no estoy seguro — empezar con las preguntas generales",
+    focusOptions: [
+      { id: "audit", title: "Facturas de flete y gasto", detail: "Puede haber preguntas sobre facturas, cargos, tarifas, pagos o control de gasto.", bring: "Traiga una factura reciente, una duda de tarifa o una explicación sencilla de cómo se revisan hoy las facturas de flete." },
+      { id: "visibility", title: "Visibilidad y excepciones", detail: "Puede haber preguntas sobre estado de envíos, retrasos, escalaciones, servicio o seguimiento manual.", bring: "Traiga un ejemplo reciente de retraso, urgencia o seguimiento de estado, o describa cómo se manejan hoy las excepciones." },
+      { id: "other", title: "Otra pregunta de transporte o comercio", detail: "La primera conversación puede tratar planificación, carriers, red, cumplimiento u operaciones comerciales.", bring: "Traiga un ejemplo concreto de proceso y el nombre de la persona que mejor lo conoce." },
+    ],
+    startingPoint: "SU PUNTO DE PARTIDA", bringLabel: "TRAIGA A LA CONVERSACIÓN",
     routeKicker: "SU RUTA DE EXPLORACIÓN",
     routeTitle: "Una ruta. Tres señales.",
     routeSteps: ["Una necesidad operativa real", "Una base digital visible", "La capacidad de movilizar un siguiente paso pequeño"],
@@ -270,10 +300,12 @@ export default function ClientBriefV2() {
   const [screen, setScreen] = useState<Screen>("start");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  const [focus, setFocus] = useState<FocusKey | null>(null);
   const [feedback, setFeedback] = useState("");
   const question = copy.questions[step];
   const answerCount = Object.keys(answers).length;
   const statuses = signalStatus(answers);
+  const focusOption = copy.focusOptions.find((option) => option.id === focus) ?? null;
   const readyCount = Object.values(statuses).filter((status) => status === "ready").length;
   const operatingExists = answers.need === "yes" || answers.need === "partial";
   const hasStartingPoint = answers.scope === "yes" || answers.scope === "partial";
@@ -297,8 +329,10 @@ export default function ClientBriefV2() {
     setAnswers((current) => ({ ...current, [question.id]: answer }));
   };
 
-  const start = () => {
+  const start = (selectedFocus: FocusKey | null = focus) => {
     setFeedback("");
+    setAnswers({});
+    setFocus(selectedFocus);
     setScreen("question");
     setStep(0);
   };
@@ -316,6 +350,7 @@ export default function ClientBriefV2() {
   const restart = () => {
     window.localStorage.removeItem(STORAGE_KEY);
     setAnswers({});
+    setFocus(null);
     setStep(0);
     setFeedback("");
     setScreen("start");
@@ -328,8 +363,9 @@ export default function ClientBriefV2() {
       return `${signal.label}: ${label}`;
     });
     const nextMove = resultState === "ready" ? copy.nextReady : resultState === "clarify" ? copy.nextNeed : statuses.foundation !== "ready" ? copy.nextFoundation : copy.nextMobilisation;
-    return `${copy.resultKicker}\n\n${resultState === "ready" ? copy.resultTitleReady : resultState === "focus" ? copy.resultTitleFocus : copy.resultTitleClarify}\n\n${signalLines.join("\n")}\n\n${copy.nextKicker}\n${nextMove}\n\n${copy.resultNote}`;
-  }, [copy, resultState, statuses]);
+    const focusLines = focusOption ? `${copy.startingPoint}\n${focusOption.title}\n\n${copy.bringLabel}\n${focusOption.bring}\n\n` : "";
+    return `${copy.resultKicker}\n\n${resultState === "ready" ? copy.resultTitleReady : resultState === "focus" ? copy.resultTitleFocus : copy.resultTitleClarify}\n\n${focusLines}${signalLines.join("\n")}\n\n${copy.nextKicker}\n${nextMove}\n\n${copy.resultNote}`;
+  }, [copy, focusOption, resultState, statuses]);
 
   const copySummary = async () => {
     try {
@@ -363,7 +399,6 @@ export default function ClientBriefV2() {
           <div className="field-language" aria-label={copy.language}>
             {LANGUAGES.map((item) => <button type="button" key={item.id} className={language === item.id ? "active" : ""} onClick={() => setLanguage(item.id)} aria-pressed={language === item.id}>{item.label}</button>)}
           </div>
-          <button type="button" className="classic-shortcut" onClick={() => navigate("/client-brief-classic")}>{copy.oldVersion}</button>
         </div>
       </header>
 
@@ -373,7 +408,13 @@ export default function ClientBriefV2() {
           <p className="field-timing">{copy.startKicker}</p>
           <h1 id="field-guide-title">{copy.title}</h1>
           <p className="field-intro">{copy.intro}</p>
-          <button type="button" className="field-primary" onClick={start}><span>{copy.start}</span><ArrowRight size={20} strokeWidth={1.8} /></button>
+          <div className="field-focus-picker">
+            <span>{copy.startPickKicker}</span><h2>{copy.startPickTitle}</h2>
+            <div className="field-focus-options">
+              {copy.focusOptions.map((option, index) => <button type="button" key={option.id} onClick={() => start(option.id)}><span>{String(index + 1).padStart(2, "0")}</span><strong>{option.title}</strong><i><ArrowRight size={16} strokeWidth={1.8} /></i></button>)}
+            </div>
+            <button type="button" className="field-secondary field-unsure-start" onClick={() => start(null)}>{copy.startUnsure}<ArrowRight size={16} strokeWidth={1.8} /></button>
+          </div>
           <p className="field-note">{copy.startNote}</p>
         </div>
         <aside className="field-route-map" aria-label={copy.routeKicker}>
@@ -404,6 +445,7 @@ export default function ClientBriefV2() {
         </aside>
         <div className="field-question-stage">
           <div className="question-stage-top"><span>{copy.questionKicker}</span><b>{copy.questionProgress} {String(step + 1).padStart(2, "0")} / 06</b></div>
+          {focusOption && <div className="field-question-context"><span>{copy.startingPoint}</span><b>{focusOption.title}</b></div>}
           <div className="question-stage-index">0{step + 1}</div>
           <h1 id="field-question-title">{question.prompt}</h1>
           <p className="question-helper">{question.helper}</p>
@@ -416,7 +458,7 @@ export default function ClientBriefV2() {
 
       {screen === "result" && <section className="field-result" aria-labelledby="exploration-map-title">
         <div className="field-result-heading">
-          <div><div className="field-kicker"><span>{copy.resultKicker}</span><i /></div><h1 id="exploration-map-title">{resultTitle}</h1></div>
+          <div><div className="field-kicker"><span>{copy.resultKicker}</span><i /></div><h1 id="exploration-map-title">{resultTitle}</h1>{focusOption && <div className="field-result-context"><span>{copy.startingPoint}</span><b>{focusOption.title}</b><p>{focusOption.detail}</p></div>}</div>
           <p>{resultBody}</p>
         </div>
         <div className="signal-map" aria-label={copy.signalKicker}>
@@ -434,10 +476,10 @@ export default function ClientBriefV2() {
             })}
           </div>
         </div>
-        <div className="field-next-move"><div className="next-route-mark" aria-hidden="true"><i /><i /><i /></div><div><span>{copy.nextKicker}</span><h2>{nextMove}</h2></div><button type="button" className="field-primary" onClick={copySummary}><Clipboard size={18} strokeWidth={1.8} /><span>{copy.copy}</span></button></div>
+        <div className="field-next-move"><div className="next-route-mark" aria-hidden="true"><i /><i /><i /></div><div><span>{copy.nextKicker}</span><h2>{nextMove}</h2>{focusOption && <p className="field-next-prep"><b>{copy.bringLabel}</b>{focusOption.bring}</p>}</div><button type="button" className="field-primary" onClick={copySummary}><Clipboard size={18} strokeWidth={1.8} /><span>{copy.copy}</span></button></div>
         <div className="field-result-utilities"><p>{copy.resultNote}</p><div><button type="button" onClick={downloadSummary}><Download size={16} strokeWidth={1.7} />{copy.download}</button><button type="button" onClick={restart}><RotateCcw size={16} strokeWidth={1.7} />{copy.restart}</button></div></div>
         {feedback && <p className="field-feedback" aria-live="polite">{feedback}</p>}
-        <footer className="field-footer"><p>{copy.classicNote}</p><button type="button" onClick={() => navigate("/client-brief-classic")}>{copy.classicLink}<ArrowRight size={15} strokeWidth={1.7} /></button></footer>
+        <footer className="field-footer"><p>{copy.signature}</p></footer>
       </section>}
     </main>
   );

@@ -9,13 +9,15 @@ import Home from "./pages/Home";
 import ClientValidationBrief from "./pages/ClientValidationBrief";
 import ClientBriefV2 from "./pages/ClientBriefV2";
 
+/* Design reminder: Cobalt Field Guide is the customer-facing entry; Decision Archive remains an explicit internal workbench. */
 
 function Router() {
   return (
     <Switch>
       <Route path={"/client-brief"} component={ClientBriefV2} />
       <Route path={"/client-brief-classic"} component={ClientValidationBrief} />
-      <Route path={"/"} component={Home} />
+      <Route path={"/workbench"} component={Home} />
+      <Route path={"/"} component={ClientBriefV2} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

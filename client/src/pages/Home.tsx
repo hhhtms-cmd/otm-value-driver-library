@@ -21,6 +21,11 @@ const FAMILY_COPY = {
 
 type ViewKey = "explore" | "assessment" | "discussion";
 type ViewContent = { label: string; code: string; title: string; copy: string; items: [string, string, string][] };
+const SIMPLE_COPY = {
+  zh: { start: "开始理清我的问题", deeper: "深入查看完整工具", deeperTitle: "需要完整 Value Driver Library 或 ROI 吗？", deeperCopy: "当你已经想清楚要探索什么时，再打开完整目录、资料库与 ROI 工作区。", returnSimple: "返回简单探索", deepNote: "完整目录、ROI 与方法论" },
+  en: { start: "Clarify my question", deeper: "View the full toolkit", deeperTitle: "Need the complete Value Driver Library or ROI?", deeperCopy: "Open the full library, information tools, and ROI workspace only when you know what you want to explore.", returnSimple: "Return to simple exploration", deepNote: "Full library, ROI, and methodology" },
+  es: { start: "Aclarar mi pregunta", deeper: "Ver el kit completo", deeperTitle: "¿Necesita la biblioteca completa o ROI?", deeperCopy: "Abra la biblioteca, las herramientas de información y el espacio ROI solo cuando sepa qué quiere explorar.", returnSimple: "Volver a la exploración simple", deepNote: "Biblioteca, ROI y metodología completos" },
+} as const;
 const VIEWS: Record<Language, Record<ViewKey, ViewContent>> = {
   zh: {
     explore: { label: "我的探索记录", code: "VIEW / 01", title: "先把你的运输问题看清。", copy: "用价值域把问题、可能的改善方向和可参考的指标放在一起，帮助你先找到最值得继续弄清的一件事。", items: [["你想改善什么", "从账单、费率、状态或流程中选一个真实问题", "quantified"], ["可能从哪里开始", "查看相关能力能回应什么问题", "pending"], ["先找哪些资料", "账单、费率、运输事件或服务线索", "pending"], ["目前知道多少", "先区分已确认、待确认与待探索的内容", "directional"]] },
@@ -50,31 +55,34 @@ export default function Home() {
   const [evidenceGates, setEvidenceGates] = useState<Record<string, EvidenceGate>>(DEFAULT_EVIDENCE_GATES);
   const [runwayPath, setRunwayPath] = useState<RunwayPath | null>(null);
   const [runwayStage, setRunwayStage] = useState<RunwayStage>("problem");
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const familyCopy = FAMILY_COPY[language];
+  const simpleCopy = SIMPLE_COPY[language];
   const localizedDrivers = useMemo(() => DRIVERS.map((driver) => localizeDriver(driver, language, t)), [language]);
   const visibleDrivers = useMemo(() => localizedDrivers.filter((driver) => familyFilter === "all" || driver.family === familyFilter), [localizedDrivers, familyFilter]);
   const selected = useMemo(() => localizedDrivers.find((driver) => driver.id === selectedId) ?? localizedDrivers[0], [localizedDrivers, selectedId]);
   const views = VIEWS[language];
   const view = views[activeView];
 
-  const selectDriver = (id: string) => { setSelectedId(id); window.setTimeout(() => scrollToId("driver-detail"), 10); };
+  const openAdvanced = (target = "advanced-tools") => { setAdvancedOpen(true); window.setTimeout(() => scrollToId(target), 10); };
+  const selectDriver = (id: string) => { setSelectedId(id); setAdvancedOpen(true); window.setTimeout(() => scrollToId("driver-detail"), 10); };
   const chooseRunwayPath = (path: RunwayPath) => {
     const driverId = path === "optimization" ? "01" : path === "audit" ? "04" : path === "visibility" ? "05" : "01";
     setRunwayPath(path);
     setSelectedId(driverId);
     setRunwayStage("driver");
   };
-  const goToRunwayDriver = () => { setRunwayStage("discovery"); scrollToId("driver-detail"); };
-  const goToRunwayDiscovery = () => { setRunwayStage("evidence"); scrollToId("discovery-file"); };
-  const goToRunwayEvidence = () => { setRunwayStage("evidence"); scrollToId("evidence-gate"); };
-  const goToRunwayRoi = () => { setRunwayStage("roi"); scrollToId("roi-export"); };
-  const goToRunwayOutput = () => { setRunwayStage("output"); scrollToId("roi-export"); };
-  const openGtmModule = (driverId: string) => { setSelectedId(driverId); setRunwayPath("broader"); setRunwayStage("driver"); window.setTimeout(() => scrollToId("driver-detail"), 10); };
+  const goToRunwayDriver = () => { setRunwayStage("discovery"); setAdvancedOpen(true); window.setTimeout(() => scrollToId("driver-detail"), 10); };
+  const goToRunwayDiscovery = () => { setRunwayStage("evidence"); setAdvancedOpen(true); window.setTimeout(() => scrollToId("discovery-file"), 10); };
+  const goToRunwayEvidence = () => { setRunwayStage("evidence"); setAdvancedOpen(true); window.setTimeout(() => scrollToId("evidence-gate"), 10); };
+  const goToRunwayRoi = () => { setRunwayStage("roi"); setAdvancedOpen(true); window.setTimeout(() => scrollToId("roi-export"), 10); };
+  const goToRunwayOutput = () => { setRunwayStage("output"); setAdvancedOpen(true); window.setTimeout(() => scrollToId("roi-export"), 10); };
+  const openGtmModule = (driverId: string) => { setSelectedId(driverId); setRunwayPath("broader"); setRunwayStage("driver"); setAdvancedOpen(true); window.setTimeout(() => scrollToId("driver-detail"), 10); };
 
   return (
-    <div className="archive-shell">
+    <div className={`archive-shell ${advancedOpen ? "archive-deep-open" : ""}`}>
       <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />One Oracle Decision Archive · Your OTM Exploration</span><div className="top-ledger-tools"><a href="/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
-      <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
+      {advancedOpen && <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
         <div className="brand-block">
           <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />
           <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">One Oracle / Decision Archive</div></div>
@@ -84,21 +92,19 @@ export default function Home() {
           {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`nav-archive-item ${selectedId === driver.id ? "active" : ""}`}><span className="nav-index">{driver.family === "GTM" ? "G" : driver.id}</span><span className="nav-label">{driver.title}</span><i className={`nav-dot ${driver.status}`} /></button>)}
         </nav>
         <div className="rail-footer"><span>{t("框架原则")}</span><p>{t("价值主张必须可追溯到痛点、能力、经营变量、KPI 与证据状态。")}</p></div>
-      </aside>
+      </aside>}
 
       <main className="page-main">
         <section className="hero" id="overview">
           <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="Abstract transportation value evidence archive" />
           <div className="hero-grid" />
           <div className="hero-content">
-            <div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><b>DECISION EVIDENCE</b><i>OTM ↔ GTM</i></div>
-            <div className="hero-meta"><i /> Framework / Value Driver Library</div>
-            <div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div>
+            {advancedOpen && <><div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><b>DECISION EVIDENCE</b><i>OTM ↔ GTM</i></div><div className="hero-meta"><i /> Framework / Value Driver Library</div><div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div></>}
             <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
             <p className="hero-copy">{language === "zh" ? "先从运输计划与装载优化（Shipment Optimization）开始：用你的订单、路线、运力和服务约束，弄清哪里可以计划得更满、更准、更少临时改动；再按需要探索费用完整性与可视化。" : language === "es" ? "Empiece por Optimización de envíos y cargas (Shipment Optimization): use sus pedidos, rutas, capacidad y restricciones de servicio para aclarar dónde puede planificar cargas más completas, mejores decisiones y menos cambios; después explore integridad de gasto y visibilidad según sea necesario." : "Start with Shipment Optimization: use your orders, routes, capacity, and service constraints to clarify where you can plan fuller loads, make better decisions, and reduce plan changes; then explore spend integrity and visibility as needed."}</p>
-            <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>
-            <div className="hero-actions"><a className="button-archive" href="#assessment-runway">{language === "zh" ? "开始我的探索" : language === "es" ? "Iniciar mi exploración" : "Start my exploration"} <span>↓</span></a><a className="button-archive ghost" href="#library">{language === "zh" ? "浏览价值档案" : language === "es" ? "Explorar la biblioteca" : "Explore the library"} <span>↗</span></a></div>
-            <div className="hero-runway-launch" aria-label={language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}>
+            {advancedOpen && <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>}
+            <div className="hero-actions"><a className="button-archive" href="#workflow">{simpleCopy.start} <span>↓</span></a><button className="button-archive ghost" type="button" onClick={() => openAdvanced()}>{simpleCopy.deeper} <span>↗</span></button></div>
+            {advancedOpen && <div className="hero-runway-launch" aria-label={language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}>
               <div className="hero-runway-launch-head"><span>START HERE / ASSESSMENT RUNWAY</span><b>{language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}</b></div>
               <div className="hero-runway-launch-options">
                 <button onClick={() => { chooseRunwayPath("optimization"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>01</span><strong>{language === "zh" ? "运输计划与装载优化" : language === "es" ? "Optimización de envíos y cargas" : "Shipment Optimization"}</strong><i>↘</i></button>
@@ -106,11 +112,13 @@ export default function Home() {
                 <button onClick={() => { chooseRunwayPath("visibility"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>03</span><strong>{language === "zh" ? "可视化与异常" : language === "es" ? "Visibilidad y excepciones" : "Visibility and exceptions"}</strong><i>↘</i></button>
                 <button onClick={() => { chooseRunwayPath("broader"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>04</span><strong>{language === "zh" ? "其他运输或贸易问题" : language === "es" ? "Otra pregunta de transporte o comercio" : "Another transport or trade question"}</strong><i>↘</i></button>
               </div>
-            </div>
+            </div>}
           </div>
         </section>
 
-        <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onOpenGtmModule={openGtmModule} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
+        <AssessmentWorkflow brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} runwayFocus={runwayPath === "optimization" ? "optimization" : runwayPath === "visibility" ? "visibility" : runwayPath === "audit" ? "audit" : undefined} />
+        <section className="deep-entry section-wrap"><div><div className="eyebrow">{simpleCopy.deepNote}</div><h2>{simpleCopy.deeperTitle}</h2><p>{simpleCopy.deeperCopy}</p></div><button type="button" onClick={() => openAdvanced()}>{simpleCopy.deeper} <span>↗</span></button></section>
+        {advancedOpen && <div className="advanced-workbench" id="advanced-tools"><div className="deep-mode-bar"><span>{simpleCopy.deepNote}</span><button type="button" onClick={() => { setAdvancedOpen(false); window.setTimeout(() => scrollToId("workflow"), 10); }}>← {simpleCopy.returnSimple}</button></div><AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onOpenGtmModule={openGtmModule} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
 
         <section className="section-wrap section-anchor" id="library">
           <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / One Oracle value map</div><h2 className="section-heading">{familyCopy.headline}</h2></div><div className="value-map-intro"><p className="section-intro">{familyCopy.intro}</p><div className="evidence-legend" aria-label="Evidence status"><span className="quantified">{t("已量化")}</span><span className="pending">{t("待量化")}</span><span className="directional">{t("方向性")}</span><span className="extension">{t("可选扩展")}</span></div></div></div>
@@ -135,8 +143,6 @@ export default function Home() {
           <div className="assessment-content"><div className="eyebrow">03 / Your exploration questions</div><h2>{language === "zh" ? "先回答你能回答的问题，再决定要不要继续。" : language === "es" ? "Responda primero lo que ya sabe y luego decida si quiere continuar." : "First answer what you already know; then decide whether to continue."}</h2><p>{language === "zh" ? "这些问题帮你判断现有资料是否足以继续探索。只有资料和范围足够清楚时，才值得尝试价值估算。" : language === "es" ? "Estas preguntas le ayudan a decidir si su información actual permite continuar. Solo pruebe una estimación de valor cuando la información y el alcance estén claros." : "These questions help you decide whether your current information supports a deeper exploration. Try a value estimate only when the information and scope are clear."}</p><div className="question-list"><div className="question-row"><span>01</span><strong>{t("运输支出是否能与合同费率和运输事件逐项匹配？")}</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>{language === "zh" ? "进出口申报量、代理费、关税货值和原产地资格是否有按国家/贸易流的可信基线？" : language === "es" ? "¿Existen líneas base confiables por país y flujo para declaraciones, honorarios de agentes, valor sujeto a arancel y elegibilidad de origen?" : "Are filing volumes, broker fees, dutiable goods value, and origin eligibility baselined credibly by country and trade flow?"}</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>{language === "zh" ? "文件延误、例外响应与加急成本在 OTM 和 GTM 之间是否已指定唯一价值归属？" : language === "es" ? "¿Se ha asignado un único propietario de valor entre OTM y GTM para retrasos documentales, respuesta a excepciones y costes urgentes?" : "Has a single value owner been assigned between OTM and GTM for document delays, exception response, and expedite cost?"}</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>{language === "zh" ? "风险规避、FTA 和 drawback 是否具备资格、范围、实现率及法务/财务确认？" : language === "es" ? "¿Riesgo evitado, FTA y drawback tienen elegibilidad, alcance, tasa de realización y confirmación legal/financiera?" : "Do risk avoidance, FTA, and drawback have eligibility, scope, realization rate, and legal/finance confirmation?"}</strong><i>↗</i></div></div></div>
         </section>
 
-        <AssessmentWorkflow drivers={localizedDrivers} evidenceGates={evidenceGates} onEvidenceGateChange={(driverId, gate) => setEvidenceGates((current) => ({ ...current, [driverId]: gate }))} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} onSelectDriver={selectDriver} runwayFocus={runwayPath === "optimization" ? "optimization" : runwayPath === "visibility" ? "visibility" : runwayPath === "audit" ? "audit" : undefined} />
-
         <section className="overlap-dossier section-wrap"><div className="overlap-file"><div className="eyebrow">03.5 / One Oracle governance</div><h3>{familyCopy.overlap}</h3><p>{familyCopy.overlapCopy}</p></div><div className="overlap-matrix"><span>OTM visibility</span><b>↔</b><span>GTM documentation</span><i>ONE ECONOMIC OWNER</i><em>Delay / expedite exposure</em></div></section>
 
         <RoiExportWorkspace drivers={localizedDrivers} evidenceGates={evidenceGates} onEvidenceGateChange={(driverId, gate) => setEvidenceGates((current) => ({ ...current, [driverId]: gate }))} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} />
@@ -146,7 +152,7 @@ export default function Home() {
           <div className="narrative-grid"><div className="narrative-steps"><div className="narrative-file-strip"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>CASE FILE / SCOPE CONTROL</span><b>04</b></div><div className="narrative-step"><span className="step-number">LAYER / 1</span><div><h3>{t("已验证的核心价值")}</h3><p>{t("US freight audit 与 visibility 的直接价值闭环；使用基线、范围、去重规则和敏感性表达。")}</p></div><span className="step-tag">Hard ROI</span></div><div className="narrative-step"><span className="step-number">LAYER / 2</span><div><h3>{t("有证据、待量化的扩展价值")}</h3><p>{t("Europe 的相同 driver 或相邻机会；说明诊断和验证计划，不承诺具体金额。")}</p></div><span className="step-tag">Validate</span></div><div className="narrative-step"><span className="step-number">LAYER / 3</span><div><h3>{t("战略路线图选项")}</h3><p>{t("网络建模、车队、可持续性或更广 Oracle 能力；保留给独立的范围确认和商业案例。")}</p></div><span className="step-tag">Roadmap</span></div></div><div className="narrative-art"><img src={assetUrl("/manus-storage/otm-narrative-layers_d2d229db.jpg")} alt="Abstract layered business-case narrative" /></div></div>
         </section>
 
-        <footer className="footer-strip"><h2>{t("先确认数据成熟度，再进入 ROI 计算。")}</h2><div className="footer-note"><b>Operational principle</b>{t("OTM Value Driver Library 将每个价值主张锚定到痛点、能力、经营变量、KPI 与可审计的证据状态。")}</div></footer>
+        <footer className="footer-strip"><h2>{t("先确认数据成熟度，再进入 ROI 计算。")}</h2><div className="footer-note"><b>Operational principle</b>{t("OTM Value Driver Library 将每个价值主张锚定到痛点、能力、经营变量、KPI 与可审计的证据状态。")}</div></footer></div>}
       </main>
     </div>
   );

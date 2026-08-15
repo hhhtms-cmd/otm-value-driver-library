@@ -92,9 +92,6 @@ export default function Home() {
         <section className="hero" id="overview">
           <img className="hero-image" src={assetUrl("/manus-storage/otm-archive-hero_347dc198.jpg")} alt="Abstract transportation value evidence archive" />
           <div className="hero-grid" />
-          <div className="hero-dossier-frame" aria-hidden="true"><span>FILE / OTM-VDL-01</span><span>DECISION DOSSIER</span><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /></div>
-          <div className="hero-evidence-stamp" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>EVIDENCE<br />FILED</span><b>01</b></div>
-          <div className="hero-margin-file" aria-hidden="true"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>CASE FILE</span><b>01</b><i>US / Audit + Visibility</i></div>
           <div className="hero-content">
             <div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><span>FILE / OO-VDL-001</span><b>DECISION EVIDENCE</b><i>OTM ↔ GTM</i></div>
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
@@ -102,9 +99,16 @@ export default function Home() {
             <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
             <p className="hero-copy">{language === "zh" ? "以 OTM、GTM 能力、客户数据、ROI 方法和决策叙事构成一条有证据、可回溯、可组装的 One Oracle 价值路径。" : language === "es" ? "Conecte capacidades OTM y GTM, datos del cliente, métodos ROI y narrativa de decisión en una ruta de valor One Oracle trazable y basada en evidencia." : "Connect OTM and GTM capabilities, customer data, ROI methods, and a decision narrative into an evidence-led, traceable One Oracle value path."}</p>
             <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>
-            <div className="hero-actions"><a className="button-archive" href="#library">{t("检索价值档案")} <span>↓</span></a><button className="button-archive ghost" onClick={() => selectDriver("04")}>{t("验证当前证据")} <span>↗</span></button></div>
+            <div className="hero-actions"><a className="button-archive" href="#assessment-runway">{t("开始 Assessment")} <span>↓</span></a><a className="button-archive ghost" href="#library">{t("浏览价值档案")} <span>↗</span></a></div>
+            <div className="hero-runway-launch" aria-label={t("从客户问题开始") }>
+              <div className="hero-runway-launch-head"><span>START HERE / ASSESSMENT RUNWAY</span><b>{t("从客户问题开始")}</b></div>
+              <div className="hero-runway-launch-options">
+                <button onClick={() => { chooseRunwayPath("audit"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>01</span><strong>{t("运费、发票与结算")}</strong><i>↘</i></button>
+                <button onClick={() => { chooseRunwayPath("visibility"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>02</span><strong>{t("可视化与异常")}</strong><i>↘</i></button>
+                <button onClick={() => { chooseRunwayPath("broader"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>03</span><strong>{t("其他运输或贸易问题")}</strong><i>↘</i></button>
+              </div>
+            </div>
           </div>
-          <aside className="hero-annotation"><strong>Current focus</strong>US freight audit & visibility<br />{t("已量化的首期价值闭环")}</aside>
         </section>
 
         <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />

@@ -116,4 +116,7 @@
 - [x] 设计 Assessment Runway 的客户痛点、Driver 选择、Discovery、Evidence Gate、ROI 与导出步骤及下一步规则。
 - [x] 实现主 Dashboard 的引导入口、步骤进度、上下文动作和已完成状态，同时保留原有功能模块。
 - [x] 验证 Assessment Runway 的主路径、证据门控、三语切换和移动端使用体验。
-- [ ] 保存并发布 Assessment Runway 更新，并提供零代码使用说明。
+- [x] 保存并发布 Assessment Runway 更新，并提供零代码使用说明。
+- [x] 删除首屏中无信息价值且文字重叠的档案卷宗框与当前案例框。
+- [x] 将 Assessment Runway 提升至首屏标题和主要动作附近，使首次打开即可看见并选择路径。
+- [x] 验证新版首屏在桌面和移动端无文字重叠，且 Runway 无需滚动即可发现。

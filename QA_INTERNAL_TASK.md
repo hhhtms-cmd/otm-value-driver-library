@@ -33,3 +33,10 @@ Desktop and 390px-wide mobile screenshots were reviewed after the language chang
 Shipment Optimization now appears first in the hero starter and in the Assessment Runway, ahead of Freight Audit, Visibility, and broader library exploration. Its Driver mapping is OTM / 01, so the selected library record is **Planning & Cost-to-Serve** rather than the former Freight Audit default.
 
 The Shipment Optimization task was exercised end to end in Chinese. The user can choose a live planning constraint, retain a minimum planning-information pack, choose colleagues, and generate a **Shipment Optimization Discussion Brief**. The completion state contains the expected brief and no Freight Audit heading, confirming the primary route does not fall back to the audit task.
+
+## Shipment Optimization terminology and GTM conditional entry
+
+- In Chinese, the hero’s first presentation now reads **运输计划与装载优化（Shipment Optimization）**. The primary Runway card and information-path tab then use the Chinese term **运输计划与装载优化** consistently.
+- Choosing **其他运输或贸易问题** opens one shared GTM relevance question. It asks whether the user’s issue involves cross-border declarations, origin/classification, duty/FTA, trade documents or trade-compliance risk.
+- Choosing **是，已经涉及** reveals only four priority GTM modules: 商品归类与原产地、贸易文件与协同、申报与代理协同、Landed Cost／FTA 与采购情景. It does not show seven separate deep questionnaires.
+- Selecting a priority module opens its corresponding GTM driver file. The browser check confirmed GTM-01 opens 商品归类、原产地与贸易主数据, while the main Decision Archive remains accessible.

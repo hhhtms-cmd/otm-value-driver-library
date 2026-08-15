@@ -1,0 +1,42 @@
+/* Design reminder: Customer-owned GTM entry — a compact trigger and four evidence-led modules, never a sprawling trade implementation questionnaire. */
+import { useState } from "react";
+import { ArrowRight, Check, Compass, FileCheck2 } from "lucide-react";
+import type { Language } from "@/contexts/LanguageContext";
+
+type TriggerChoice = "yes" | "no" | "unsure";
+type Module = { driverId: string; code: string; title: string; copy: string; prompt: string };
+type Copy = { eyebrow: string; title: string; intro: string; question: string; yes: string; no: string; unsure: string; noTitle: string; noCopy: string; moduleLabel: string; moduleIntro: string; open: string; modules: Module[] };
+
+const COPY: Record<Language, Copy> = {
+  zh: {
+    eyebrow: "GTM / CONDITIONAL ENTRY", title: "先判断：你的问题是否真的涉及全球贸易？", intro: "不是每个运输问题都需要贸易调查。只有当跨境申报、原产地、关税、贸易文件或合规风险与你的实际情况有关时，才展开少数相关模块。", question: "你的运输或贸易问题，是否涉及跨境申报、原产地／商品归类、关税／FTA、贸易文件，或贸易合规风险？", yes: "是，已经涉及", no: "否，目前不涉及", unsure: "不确定，想先判断", noTitle: "先留在你当前的 OTM 路径即可。", noCopy: "你不需要现在回答任何 GTM 问题。以后出现跨境、关税、贸易文件或合规需要时，再从这里展开。", moduleLabel: "按你的问题展开", moduleIntro: "只选一个最贴近你现状的模块。每个模块先帮你整理两条资料线索和一次内部讨论，不承诺金额，也不要求一次完成全部内容。", open: "开始这项探索", modules: [
+      { driverId: "GTM-01", code: "GTM / 01", title: "商品归类与原产地", copy: "归类、原产地或产品贸易属性是否分散、靠人工维护，或造成重复确认？", prompt: "先找：一组代表性产品、当前归类／原产地记录，以及最了解主数据的同事。" },
+      { driverId: "GTM-02", code: "GTM / 02", title: "贸易文件与协同", copy: "文件是否靠人工拼接、跨团队追踪，或因缺失与延误影响运输节奏？", prompt: "先找：一票代表性跨境运输、涉及的文件，以及一次交接或例外记录。" },
+      { driverId: "GTM-03", code: "GTM / 03", title: "申报与代理协同", copy: "申报、代理、海关作业是否缺少透明度，或经常出现返工与例外？", prompt: "先找：申报量、代理工作方式，以及一两个返工或例外样本。" },
+      { driverId: "GTM-04", code: "GTM / 04", title: "Landed Cost、FTA 与采购情景", copy: "关税、FTA 或采购国选择是否正在影响产品、供应商或成本决策？", prompt: "先找：一条产品／国家贸易流、当前税费处理，以及原产地或 FTA 资格线索。" },
+    ],
+  },
+  en: {
+    eyebrow: "GTM / CONDITIONAL ENTRY", title: "First decide: does your question genuinely involve global trade?", intro: "Not every transport issue needs a trade questionnaire. Expand only when cross-border filings, origin, duty, trade documents, or compliance risk are relevant to your real situation.", question: "Does your transport or trade question involve cross-border filings, origin/product classification, duty/FTA, trade documentation, or trade-compliance risk?", yes: "Yes, it already does", no: "No, not currently", unsure: "Not sure — help me decide", noTitle: "Stay with your current OTM path for now.", noCopy: "You do not need to answer any GTM questions today. Return here when cross-border, duty, trade-document, or compliance needs become relevant.", moduleLabel: "Expand for your question", moduleIntro: "Choose only one module closest to your situation. Each starts with two information prompts and an internal discussion—not a value promise or a demand to complete everything at once.", open: "Start this exploration", modules: [
+      { driverId: "GTM-01", code: "GTM / 01", title: "Product classification and origin", copy: "Are classification, origin, or product trade attributes fragmented, manually maintained, or repeatedly rechecked?", prompt: "Locate: a representative product set, current classification/origin records, and the colleague who knows master data." },
+      { driverId: "GTM-02", code: "GTM / 02", title: "Trade documents and collaboration", copy: "Are documents manually assembled, chased across teams, or disrupting transport when they are late or incomplete?", prompt: "Locate: one representative cross-border shipment, the documents involved, and one hand-off or exception trail." },
+      { driverId: "GTM-03", code: "GTM / 03", title: "Declarations and broker collaboration", copy: "Do filing, broker, or customs processes lack visibility or create recurring rework and exceptions?", prompt: "Locate: filing volumes, the broker workflow, and one or two rework or exception samples." },
+      { driverId: "GTM-04", code: "GTM / 04", title: "Landed cost, FTA, and sourcing scenarios", copy: "Are duty, FTA eligibility, or sourcing-country choices shaping product, supplier, or cost decisions?", prompt: "Locate: one product/country trade flow, current duty treatment, and origin or FTA eligibility clues." },
+    ],
+  },
+  es: {
+    eyebrow: "GTM / ENTRADA CONDICIONAL", title: "Primero decida: ¿su pregunta realmente implica comercio global?", intro: "No todo problema de transporte necesita un cuestionario de comercio. Amplíelo solo cuando declaraciones transfronterizas, origen, aranceles, documentos comerciales o riesgos de cumplimiento sean relevantes para su situación.", question: "¿Su pregunta de transporte o comercio implica declaraciones transfronterizas, origen/clasificación de producto, aranceles/FTA, documentación comercial o riesgo de cumplimiento?", yes: "Sí, ya lo implica", no: "No, por ahora no", unsure: "No estoy seguro; quiero comprobarlo", noTitle: "Por ahora, manténgase en su ruta OTM actual.", noCopy: "No necesita responder preguntas GTM hoy. Vuelva aquí cuando asuntos transfronterizos, aranceles, documentos comerciales o cumplimiento sean relevantes.", moduleLabel: "Amplíe según su pregunta", moduleIntro: "Elija solo el módulo más cercano a su situación. Cada uno empieza con dos pistas de información y una discusión interna; no es una promesa de valor ni una petición para completar todo de una vez.", open: "Iniciar esta exploración", modules: [
+      { driverId: "GTM-01", code: "GTM / 01", title: "Clasificación y origen de productos", copy: "¿Clasificación, origen o atributos comerciales de producto están fragmentados, se mantienen manualmente o se revisan repetidamente?", prompt: "Localice: un conjunto representativo de productos, registros actuales de clasificación/origen y quien conoce los datos maestros." },
+      { driverId: "GTM-02", code: "GTM / 02", title: "Documentos comerciales y colaboración", copy: "¿Los documentos se arman manualmente, se persiguen entre equipos o afectan el transporte cuando llegan tarde o incompletos?", prompt: "Localice: un envío transfronterizo representativo, los documentos involucrados y un rastro de entrega o excepción." },
+      { driverId: "GTM-03", code: "GTM / 03", title: "Declaraciones y colaboración con agentes", copy: "¿Los procesos de declaración, agentes o aduana carecen de visibilidad o generan retrabajo y excepciones recurrentes?", prompt: "Localice: volúmenes de declaración, el flujo del agente y una o dos muestras de retrabajo o excepción." },
+      { driverId: "GTM-04", code: "GTM / 04", title: "Landed cost, FTA y escenarios de abastecimiento", copy: "¿Aranceles, elegibilidad FTA o decisiones de país de abastecimiento afectan decisiones de producto, proveedor o coste?", prompt: "Localice: un flujo producto/país, el tratamiento arancelario actual y pistas de origen o elegibilidad FTA." },
+    ],
+  },
+};
+
+type Props = { language: Language; onOpenModule: (driverId: string) => void };
+export default function GtmTriggeredModules({ language, onOpenModule }: Props) {
+  const c = COPY[language];
+  const [choice, setChoice] = useState<TriggerChoice | null>(null);
+  return <section id="gtm-trigger" className="gtm-trigger" aria-labelledby="gtm-trigger-title"><div className="gtm-trigger-head"><div><span>{c.eyebrow}</span><h2 id="gtm-trigger-title">{c.title}</h2></div><p>{c.intro}</p></div><div className="gtm-trigger-question"><FileCheck2 size={20} strokeWidth={1.7} /><div><span>{c.question}</span><div className="gtm-choice-row"><button className={choice === "yes" ? "active" : ""} onClick={() => setChoice("yes")}>{c.yes}</button><button className={choice === "no" ? "active" : ""} onClick={() => setChoice("no")}>{c.no}</button><button className={choice === "unsure" ? "active" : ""} onClick={() => setChoice("unsure")}>{c.unsure}</button></div></div></div>{choice === "no" && <div className="gtm-no-result"><Compass size={20} strokeWidth={1.7} /><div><h3>{c.noTitle}</h3><p>{c.noCopy}</p></div></div>}{(choice === "yes" || choice === "unsure") && <div className="gtm-module-zone"><div className="gtm-module-intro"><span>{c.moduleLabel}</span><p>{c.moduleIntro}</p></div><div className="gtm-module-grid">{c.modules.map((module) => <article key={module.driverId} className="gtm-module-card"><span>{module.code}</span><h3>{module.title}</h3><p>{module.copy}</p><div><b>{module.prompt}</b><button onClick={() => onOpenModule(module.driverId)}>{c.open}<ArrowRight size={15} strokeWidth={1.8} /></button></div></article>)}</div></div>}</section>;
+}

@@ -148,3 +148,9 @@
 - [x] 实现 Shipment Optimization 的自助讨论任务，并保留 Freight Audit 现有任务与价值边界。
 - [x] 验证新主路径、Freight Audit 次级路径、中英西文案和手机体验。
 - [x] 保存并发布以 Shipment Optimization 为核心的客户自助 Decision Archive。
+- [x] 审计 Shipment Optimization 的中英西术语与 GTM 调查入口，定位需要统一和分流的位置。
+- [x] 定义共同入口的 GTM 触发问题、触发边界与四个优先深度模块。
+- [x] 定义共同入口的 GTM 触发问题、触发边界与四个优先深度模块。
+- [x] 将中文中的 Shipment Optimization 统一为“运输计划与装载优化”，首次出现保留英文术语对照。
+- [x] 实现 GTM 条件式深度模块入口，避免为全部 GTM Value Driver 预置完整问卷。
+- [x] 验证三语术语、GTM 触发和手机端路径，并发布更新。

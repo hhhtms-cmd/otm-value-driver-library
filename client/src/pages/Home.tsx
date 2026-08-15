@@ -44,7 +44,7 @@ function scrollToId(id: string) { document.getElementById(id)?.scrollIntoView({ 
 export default function Home() {
   const { language } = useLanguage();
   const t = (value: string) => translate(language, value);
-  const [selectedId, setSelectedId] = useState("04");
+  const [selectedId, setSelectedId] = useState("01");
   const [familyFilter, setFamilyFilter] = useState<FamilyFilter>("all");
   const [activeView, setActiveView] = useState<ViewKey>("explore");
   const [evidenceGates, setEvidenceGates] = useState<Record<string, EvidenceGate>>(DEFAULT_EVIDENCE_GATES);
@@ -69,6 +69,7 @@ export default function Home() {
   const goToRunwayEvidence = () => { setRunwayStage("evidence"); scrollToId("evidence-gate"); };
   const goToRunwayRoi = () => { setRunwayStage("roi"); scrollToId("roi-export"); };
   const goToRunwayOutput = () => { setRunwayStage("output"); scrollToId("roi-export"); };
+  const openGtmModule = (driverId: string) => { setSelectedId(driverId); setRunwayPath("broader"); setRunwayStage("driver"); window.setTimeout(() => scrollToId("driver-detail"), 10); };
 
   return (
     <div className="archive-shell">
@@ -94,13 +95,13 @@ export default function Home() {
             <div className="hero-meta"><i /> Framework / Value Driver Library</div>
             <div className="hero-file-caption"><span>Evidence register</span><b>pain point → capability → KPI → value</b></div>
             <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
-            <p className="hero-copy">{language === "zh" ? "先从 Shipment Optimization 开始：用你的订单、路线、运力和服务约束，弄清哪里可以计划得更满、更准、更少临时改动；再按需要探索费用完整性与可视化。" : language === "es" ? "Empiece por Shipment Optimization: use sus pedidos, rutas, capacidad y restricciones de servicio para aclarar dónde puede planificar cargas más completas, mejores decisiones y menos cambios; después explore integridad de gasto y visibilidad según sea necesario." : "Start with Shipment Optimization: use your orders, routes, capacity, and service constraints to clarify where you can plan fuller loads, make better decisions, and reduce plan changes; then explore spend integrity and visibility as needed."}</p>
+            <p className="hero-copy">{language === "zh" ? "先从运输计划与装载优化（Shipment Optimization）开始：用你的订单、路线、运力和服务约束，弄清哪里可以计划得更满、更准、更少临时改动；再按需要探索费用完整性与可视化。" : language === "es" ? "Empiece por Optimización de envíos y cargas (Shipment Optimization): use sus pedidos, rutas, capacidad y restricciones de servicio para aclarar dónde puede planificar cargas más completas, mejores decisiones y menos cambios; después explore integridad de gasto y visibilidad según sea necesario." : "Start with Shipment Optimization: use your orders, routes, capacity, and service constraints to clarify where you can plan fuller loads, make better decisions, and reduce plan changes; then explore spend integrity and visibility as needed."}</p>
             <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>
             <div className="hero-actions"><a className="button-archive" href="#assessment-runway">{language === "zh" ? "开始我的探索" : language === "es" ? "Iniciar mi exploración" : "Start my exploration"} <span>↓</span></a><a className="button-archive ghost" href="#library">{language === "zh" ? "浏览价值档案" : language === "es" ? "Explorar la biblioteca" : "Explore the library"} <span>↗</span></a></div>
             <div className="hero-runway-launch" aria-label={language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}>
               <div className="hero-runway-launch-head"><span>START HERE / ASSESSMENT RUNWAY</span><b>{language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}</b></div>
               <div className="hero-runway-launch-options">
-                <button onClick={() => { chooseRunwayPath("optimization"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>01</span><strong>Shipment Optimization</strong><i>↘</i></button>
+                <button onClick={() => { chooseRunwayPath("optimization"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>01</span><strong>{language === "zh" ? "运输计划与装载优化" : language === "es" ? "Optimización de envíos y cargas" : "Shipment Optimization"}</strong><i>↘</i></button>
                 <button onClick={() => { chooseRunwayPath("audit"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>02</span><strong>{language === "zh" ? "运费、发票与结算" : language === "es" ? "Gasto de flete, facturas y liquidación" : "Freight spend, invoices and settlement"}</strong><i>↘</i></button>
                 <button onClick={() => { chooseRunwayPath("visibility"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>03</span><strong>{language === "zh" ? "可视化与异常" : language === "es" ? "Visibilidad y excepciones" : "Visibility and exceptions"}</strong><i>↘</i></button>
                 <button onClick={() => { chooseRunwayPath("broader"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><span>04</span><strong>{language === "zh" ? "其他运输或贸易问题" : language === "es" ? "Otra pregunta de transporte o comercio" : "Another transport or trade question"}</strong><i>↘</i></button>
@@ -109,7 +110,7 @@ export default function Home() {
           </div>
         </section>
 
-        <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
+        <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onOpenGtmModule={openGtmModule} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
 
         <section className="section-wrap section-anchor" id="library">
           <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / One Oracle value map</div><h2 className="section-heading">{familyCopy.headline}</h2></div><div className="value-map-intro"><p className="section-intro">{familyCopy.intro}</p><div className="evidence-legend" aria-label="Evidence status"><span className="quantified">{t("已量化")}</span><span className="pending">{t("待量化")}</span><span className="directional">{t("方向性")}</span><span className="extension">{t("可选扩展")}</span></div></div></div>

@@ -9,12 +9,12 @@ type Copy = { eyebrow: string; title: string; intro: string; progress: string[];
 
 const COPY: Record<Language, Copy> = {
   zh: {
-    eyebrow: "TASK / 01 · SHIPMENT OPTIMIZATION", title: "准备一次 Shipment Optimization 内部讨论。", intro: "用不到五分钟，先把你想改善的计划问题、可以查看的资料和应参与的同事理清楚。完成后会得到一份可直接转发给团队的讨论清单。", progress: ["确定计划问题", "确认资料", "找对同事"],
+    eyebrow: "TASK / 01 · 运输计划与装载优化", title: "准备一次运输计划与装载优化内部讨论。", intro: "用不到五分钟，先把你想改善的计划问题、可以查看的资料和应参与的同事理清楚。完成后会得到一份可直接转发给团队的讨论清单。", progress: ["确定计划问题", "确认资料", "找对同事"],
     issueKicker: "第一步 / 选择最真实的计划约束", issueTitle: "你最想先改善哪一种运输计划情况？", issues: ["订单难以合并，装载经常不满", "路线、方式或服务选择高度依靠人工判断", "临时改计划、加急或空驶经常发生", "有运力但计划员难以有效利用"],
     informationKicker: "第二步 / 最小计划资料包", informationTitle: "先从团队里找哪些资料？", informationCopy: "资料不需要完整，也不需要提前清洗。第一次讨论只需要确认是否存在一条可回看的计划线索，以及谁最了解它。", informationItems: ["一段代表性的订单、发运或计划历史", "相关运价、路线、服务承诺、时窗或运力约束", "一次低装载、加急、改计划或服务取舍的实际样本"],
     peopleKicker: "第三步 / 找到最了解计划的人", peopleTitle: "谁适合和你一起参加这 45 分钟？", peopleCopy: "先按实际了解情况的角色选择，不需要现在组建完整项目团队。", peopleItems: ["了解运输计划、调度或订单合并的人", "了解服务承诺、订单节奏或客户需求的人", "了解承运商、费率或运输成本的人"],
-    back: "上一步", next: "继续", build: "生成讨论清单", resultKicker: "你的计划优化讨论已准备好", resultTitle: "Shipment Optimization Discussion Brief 已准备好。", resultCopy: "这不是 ROI，也不是产品推荐。它只帮助你和团队围绕一个计划问题、资料线索和运营角色展开讨论。",
-    focusLabel: "你想改善的计划问题", requestLabel: "从你团队里找", peopleLabel: "请一起讨论", agendaLabel: "45 分钟建议内部讨论议程", agenda: ["5 分钟：确认这个计划问题发生在哪里、为什么重要", "20 分钟：走读订单、路线、服务选择和实际计划过程", "10 分钟：确认资料线索、约束条件和最了解它的同事", "10 分钟：决定是否值得继续探索 Shipment Optimization"],
+    back: "上一步", next: "继续", build: "生成讨论清单", resultKicker: "你的运输计划与装载优化讨论已准备好", resultTitle: "运输计划与装载优化讨论摘要已准备好。", resultCopy: "这不是 ROI，也不是产品推荐。它只帮助你和团队围绕一个计划问题、资料线索和运营角色展开讨论。",
+    focusLabel: "你想改善的计划问题", requestLabel: "从你团队里找", peopleLabel: "请一起讨论", agendaLabel: "45 分钟建议内部讨论议程", agenda: ["5 分钟：确认这个计划问题发生在哪里、为什么重要", "20 分钟：走读订单、路线、服务选择和实际计划过程", "10 分钟：确认资料线索、约束条件和最了解它的同事", "10 分钟：决定是否值得继续探索运输计划与装载优化"],
     copy: "复制讨论清单", copied: "讨论清单已复制", download: "下载讨论清单", restart: "重新准备一份", openDiscovery: "需要更多细节时，继续查看资料线索", boundary: "完成这份清单后，再由你和团队决定是否继续整理资料、确认计划约束或尝试价值估算。",
   },
   en: {

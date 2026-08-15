@@ -1,6 +1,7 @@
 /* Design reminder: "决策档案室" — evidence-first interactive archive; use asymmetric editorial composition and restrained vermilion highlights. */
 import { useMemo, useState } from "react";
 import AssessmentWorkflow from "@/components/AssessmentWorkflow";
+import AssessmentRunway, { type RunwayPath, type RunwayStage } from "@/components/AssessmentRunway";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import RoiExportWorkspace from "@/components/RoiExportWorkspace";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -51,6 +52,8 @@ export default function Home() {
   const [familyFilter, setFamilyFilter] = useState<FamilyFilter>("all");
   const [activeView, setActiveView] = useState<keyof typeof VIEWS>("internal");
   const [evidenceGates, setEvidenceGates] = useState<Record<string, EvidenceGate>>(DEFAULT_EVIDENCE_GATES);
+  const [runwayPath, setRunwayPath] = useState<RunwayPath | null>(null);
+  const [runwayStage, setRunwayStage] = useState<RunwayStage>("problem");
   const familyCopy = FAMILY_COPY[language];
   const localizedDrivers = useMemo(() => DRIVERS.map((driver) => localizeDriver(driver, language, t)), [language]);
   const visibleDrivers = useMemo(() => localizedDrivers.filter((driver) => familyFilter === "all" || driver.family === familyFilter), [localizedDrivers, familyFilter]);
@@ -58,6 +61,17 @@ export default function Home() {
   const view = VIEWS[activeView];
 
   const selectDriver = (id: string) => { setSelectedId(id); window.setTimeout(() => scrollToId("driver-detail"), 10); };
+  const chooseRunwayPath = (path: RunwayPath) => {
+    const driverId = path === "audit" ? "04" : path === "visibility" ? "05" : "01";
+    setRunwayPath(path);
+    setSelectedId(driverId);
+    setRunwayStage("driver");
+  };
+  const goToRunwayDriver = () => { setRunwayStage("discovery"); scrollToId("driver-detail"); };
+  const goToRunwayDiscovery = () => { setRunwayStage("evidence"); scrollToId("discovery-file"); };
+  const goToRunwayEvidence = () => { setRunwayStage("evidence"); scrollToId("evidence-gate"); };
+  const goToRunwayRoi = () => { setRunwayStage("roi"); scrollToId("roi-export"); };
+  const goToRunwayOutput = () => { setRunwayStage("output"); scrollToId("roi-export"); };
 
   return (
     <div className="archive-shell">
@@ -93,6 +107,8 @@ export default function Home() {
           <aside className="hero-annotation"><strong>Current focus</strong>US freight audit & visibility<br />{t("已量化的首期价值闭环")}</aside>
         </section>
 
+        <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
+
         <section className="section-wrap section-anchor" id="library">
           <div className="section-lead"><div><div className="eyebrow"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />01 / One Oracle value map</div><h2 className="section-heading">{familyCopy.headline}</h2></div><div className="value-map-intro"><p className="section-intro">{familyCopy.intro}</p><div className="evidence-legend" aria-label="Evidence status"><span className="quantified">{t("已量化")}</span><span className="pending">{t("待量化")}</span><span className="directional">{t("方向性")}</span><span className="extension">{t("可选扩展")}</span></div></div></div>
           <div className="library-family-tabs" role="tablist" aria-label="One Oracle capability families"><button className={familyFilter === "all" ? "active" : ""} onClick={() => setFamilyFilter("all")}>{familyCopy.all}<b>{localizedDrivers.length}</b></button><button className={familyFilter === "OTM" ? "active" : ""} onClick={() => setFamilyFilter("OTM")}>{familyCopy.otm}<b>{localizedDrivers.filter((driver) => driver.family === "OTM").length}</b></button><button className={familyFilter === "GTM" ? "active" : ""} onClick={() => setFamilyFilter("GTM")}>{familyCopy.gtm}<b>{localizedDrivers.filter((driver) => driver.family === "GTM").length}</b></button></div>
@@ -116,7 +132,7 @@ export default function Home() {
           <div className="assessment-content"><div className="eyebrow">03 / Assessment entry</div><h2>{t("Value Assessment 是共同诊断，不是预设结论。")}</h2><p>{t("从客户可以回答的问题开始，逐步确认基线、数据和证据状态；只有通过数据门槛的 driver 才进入 ROI 计算和预算叙事。")}</p><div className="question-list"><div className="question-row"><span>01</span><strong>{t("运输支出是否能与合同费率和运输事件逐项匹配？")}</strong><i>↗</i></div><div className="question-row"><span>02</span><strong>{language === "zh" ? "进出口申报量、代理费、关税货值和原产地资格是否有按国家/贸易流的可信基线？" : language === "es" ? "¿Existen líneas base confiables por país y flujo para declaraciones, honorarios de agentes, valor sujeto a arancel y elegibilidad de origen?" : "Are filing volumes, broker fees, dutiable goods value, and origin eligibility baselined credibly by country and trade flow?"}</strong><i>↗</i></div><div className="question-row"><span>03</span><strong>{language === "zh" ? "文件延误、例外响应与加急成本在 OTM 和 GTM 之间是否已指定唯一价值归属？" : language === "es" ? "¿Se ha asignado un único propietario de valor entre OTM y GTM para retrasos documentales, respuesta a excepciones y costes urgentes?" : "Has a single value owner been assigned between OTM and GTM for document delays, exception response, and expedite cost?"}</strong><i>↗</i></div><div className="question-row"><span>04</span><strong>{language === "zh" ? "风险规避、FTA 和 drawback 是否具备资格、范围、实现率及法务/财务确认？" : language === "es" ? "¿Riesgo evitado, FTA y drawback tienen elegibilidad, alcance, tasa de realización y confirmación legal/financiera?" : "Do risk avoidance, FTA, and drawback have eligibility, scope, realization rate, and legal/finance confirmation?"}</strong><i>↗</i></div></div></div>
         </section>
 
-        <AssessmentWorkflow drivers={localizedDrivers} evidenceGates={evidenceGates} onEvidenceGateChange={(driverId, gate) => setEvidenceGates((current) => ({ ...current, [driverId]: gate }))} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} onSelectDriver={selectDriver} />
+        <AssessmentWorkflow drivers={localizedDrivers} evidenceGates={evidenceGates} onEvidenceGateChange={(driverId, gate) => setEvidenceGates((current) => ({ ...current, [driverId]: gate }))} brandMarkSrc={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} onSelectDriver={selectDriver} runwayFocus={runwayPath === "visibility" ? "visibility" : runwayPath === "audit" ? "audit" : undefined} />
 
         <section className="overlap-dossier section-wrap"><div className="overlap-file"><div className="eyebrow">03.5 / One Oracle governance</div><h3>{familyCopy.overlap}</h3><p>{familyCopy.overlapCopy}</p></div><div className="overlap-matrix"><span>OTM visibility</span><b>↔</b><span>GTM documentation</span><i>ONE ECONOMIC OWNER</i><em>Delay / expedite exposure</em></div></section>
 

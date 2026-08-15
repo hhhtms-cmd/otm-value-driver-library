@@ -112,3 +112,8 @@
 - [x] 建立全新视觉方向与三语内容体系，并保留原 Client Brief 作为独立对照版本。
 - [x] 实现新的客户自诊断问卷、适配性结果与下一步行动体验。
 - [x] 验证新旧路由、三语问卷、诊断交互及桌面和移动端视觉质量后发布。
+- [x] 盘点现有主 Dashboard 的 Value Driver、Discovery、Evidence、ROI 与输出功能，并定位用户路径断点。
+- [x] 设计 Assessment Runway 的客户痛点、Driver 选择、Discovery、Evidence Gate、ROI 与导出步骤及下一步规则。
+- [x] 实现主 Dashboard 的引导入口、步骤进度、上下文动作和已完成状态，同时保留原有功能模块。
+- [x] 验证 Assessment Runway 的主路径、证据门控、三语切换和移动端使用体验。
+- [ ] 保存并发布 Assessment Runway 更新，并提供零代码使用说明。

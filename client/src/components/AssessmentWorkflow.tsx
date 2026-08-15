@@ -1,5 +1,5 @@
 /* Design reminder: "决策档案室" — a workshop dossier that makes evidence maturity visible before financial value is asserted. */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { gateDescription, isHardRoiGate, type EvidenceGate } from "@/lib/evidence";
 import type { Driver } from "@/lib/oneOracleDrivers";
@@ -11,9 +11,10 @@ type WorkflowProps = {
   onEvidenceGateChange: (driverId: string, gate: EvidenceGate) => void;
   brandMarkSrc: string;
   onSelectDriver: (id: string) => void;
+  runwayFocus?: WorkflowFocus;
 };
 
-type Focus = "audit" | "visibility";
+export type WorkflowFocus = "audit" | "visibility";
 type Copy = { kicker: string; title: string; intro: string; layers: string[]; discovery: string; collaboration: string; evidence: string; executive: string; audit: string; visibility: string; focusCopy: string; gate: string; owner: string; period: string; scope: string; source: string; fallback: string; status: string; statusValues: string[]; required: string; hard: string; opportunity: string; next: string; exportReady: string; notReady: string; question: string; questions: string[] };
 
 const COPY: Record<Language, Copy> = {
@@ -27,10 +28,10 @@ const DISCOVERY_FIELDS = {
   visibility: ["Shipment milestone and ETA coverage", "Exception volume and closure time", "Manual status-check minutes", "Avoidable expedite / recovery cost", "Customer-service and planner ownership"],
 };
 
-export default function AssessmentWorkflow({ drivers, evidenceGates, onEvidenceGateChange, brandMarkSrc, onSelectDriver }: WorkflowProps) {
+export default function AssessmentWorkflow({ drivers, evidenceGates, onEvidenceGateChange, brandMarkSrc, onSelectDriver, runwayFocus }: WorkflowProps) {
   const { language } = useLanguage();
   const c = COPY[language];
-  const [focus, setFocus] = useState<Focus>("audit");
+  const [focus, setFocus] = useState<WorkflowFocus>("audit");
   const [collectionStatus, setCollectionStatus] = useState(c.statusValues[0]);
   const targetId = focus === "audit" ? "04" : "05";
   const target = drivers.find((driver) => driver.id === targetId);
@@ -38,13 +39,15 @@ export default function AssessmentWorkflow({ drivers, evidenceGates, onEvidenceG
   const hardEligible = isHardRoiGate(gate);
   const readiness = useMemo(() => ({ audited: evidenceGates["04"] ?? "E0", visible: evidenceGates["05"] ?? "E0" }), [evidenceGates]);
 
+  useEffect(() => { if (runwayFocus) setFocus(runwayFocus); }, [runwayFocus]);
+
   return <section className="assessment-workflow section-wrap section-anchor" id="workflow">
     <div className="section-lead"><div><div className="eyebrow"><img src={brandMarkSrc} alt="" />{c.kicker}</div><h2 className="section-heading">{c.title}</h2></div><p className="section-intro">{c.intro}</p></div>
     <div className="workflow-rail" aria-label="Assessment workflow">{c.layers.map((layer, index) => <div className={`workflow-rail-step ${index === 0 ? "active" : ""}`} key={layer}><b>0{index + 1}</b><span>{layer}</span></div>)}</div>
     <div className="workflow-dossier">
-      <div className="workflow-discovery"><div className="workflow-file-head"><img src={brandMarkSrc} alt="" /><span>DISCOVERY FILE / PHASE 01</span><b>{focus === "audit" ? "OTM-01" : "OTM-02"}</b></div><div className="workflow-focus-tabs"><button className={focus === "audit" ? "active" : ""} onClick={() => { setFocus("audit"); onSelectDriver("04"); }}>{c.audit}</button><button className={focus === "visibility" ? "active" : ""} onClick={() => { setFocus("visibility"); onSelectDriver("05"); }}>{c.visibility}</button></div><p>{c.focusCopy}</p><div className="workflow-questions"><span>{c.question}</span>{c.questions.slice(focus === "audit" ? 0 : 2, focus === "audit" ? 2 : 4).map((question, index) => <div key={question}><b>Q0{index + 1}</b><strong>{question}</strong></div>)}</div><button className="workflow-driver-link" onClick={() => onSelectDriver(targetId)}>{target?.title} <i>↗</i></button></div>
+      <div className="workflow-discovery" id="discovery-file"><div className="workflow-file-head"><img src={brandMarkSrc} alt="" /><span>DISCOVERY FILE / PHASE 01</span><b>{focus === "audit" ? "OTM-01" : "OTM-02"}</b></div><div className="workflow-focus-tabs"><button className={focus === "audit" ? "active" : ""} onClick={() => { setFocus("audit"); onSelectDriver("04"); }}>{c.audit}</button><button className={focus === "visibility" ? "active" : ""} onClick={() => { setFocus("visibility"); onSelectDriver("05"); }}>{c.visibility}</button></div><p>{c.focusCopy}</p><div className="workflow-questions"><span>{c.question}</span>{c.questions.slice(focus === "audit" ? 0 : 2, focus === "audit" ? 2 : 4).map((question, index) => <div key={question}><b>Q0{index + 1}</b><strong>{question}</strong></div>)}</div><button className="workflow-driver-link" onClick={() => onSelectDriver(targetId)}>{target?.title} <i>↗</i></button></div>
       <div className="workflow-collaboration"><div className="workflow-panel-label">02 / {c.collaboration}</div><h3>{c.required}</h3><div className="evidence-field-list">{DISCOVERY_FIELDS[focus].map((field, index) => <div className="evidence-field" key={field}><b>{String(index + 1).padStart(2, "0")}</b><span>{field}</span><i>{index < 2 ? c.owner : index === 2 ? c.period : c.scope}</i></div>)}</div><div className="workflow-record-grid"><label><span>{c.source}</span><input placeholder={language === "zh" ? "例如：AP、TMS 或客户工作簿" : "e.g., AP, TMS, or client workbook"} /></label><label><span>{c.status}</span><select value={collectionStatus} onChange={(event) => setCollectionStatus(event.target.value)}>{c.statusValues.map((status) => <option key={status}>{status}</option>)}</select></label><label><span>{c.fallback}</span><input placeholder={language === "zh" ? "样本、季度年化或待定" : "Sample, annualized quarter, or TBD"} /></label></div></div>
-      <div className="workflow-gate"><div className="workflow-panel-label">03 / {c.evidence}</div><h3>{gate} <span>{gateDescription[gate]}</span></h3><select value={gate} onChange={(event) => onEvidenceGateChange(targetId, event.target.value as EvidenceGate)}>{(["E0", "E1", "E2", "E3"] as EvidenceGate[]).map((item) => <option key={item} value={item}>{item} — {gateDescription[item]}</option>)}</select><div className={`workflow-gate-result ${hardEligible ? "ready" : "blocked"}`}><b>{hardEligible ? c.hard : c.opportunity}</b><span>{hardEligible ? c.exportReady : c.notReady}</span></div><div className="workflow-readiness"><span>OTM-01 / {readiness.audited}</span><span>OTM-02 / {readiness.visible}</span></div><p><strong>{c.next}:</strong> {hardEligible ? (language === "zh" ? "确认范围、币种、TCO 与重叠归属后，纳入 Executive Output。" : language === "es" ? "Confirme alcance, moneda, TCO y solapamiento antes de incluirlo en la salida ejecutiva." : "Confirm scope, currency, TCO, and overlap ownership before including it in Executive Output.") : (language === "zh" ? "完成客户基线与财务/业务负责人验证，再升级为 E2。" : language === "es" ? "Complete la línea base del cliente y la validación del responsable financiero/operativo antes de elevarlo a E2." : "Complete the customer baseline and finance/operational-owner validation before promoting to E2.")}</p></div>
+      <div className="workflow-gate" id="evidence-gate"><div className="workflow-panel-label">03 / {c.evidence}</div><h3>{gate} <span>{gateDescription[gate]}</span></h3><select value={gate} onChange={(event) => onEvidenceGateChange(targetId, event.target.value as EvidenceGate)}>{(["E0", "E1", "E2", "E3"] as EvidenceGate[]).map((item) => <option key={item} value={item}>{item} — {gateDescription[item]}</option>)}</select><div className={`workflow-gate-result ${hardEligible ? "ready" : "blocked"}`}><b>{hardEligible ? c.hard : c.opportunity}</b><span>{hardEligible ? c.exportReady : c.notReady}</span></div><div className="workflow-readiness"><span>OTM-01 / {readiness.audited}</span><span>OTM-02 / {readiness.visible}</span></div><p><strong>{c.next}:</strong> {hardEligible ? (language === "zh" ? "确认范围、币种、TCO 与重叠归属后，纳入 Executive Output。" : language === "es" ? "Confirme alcance, moneda, TCO y solapamiento antes de incluirlo en la salida ejecutiva." : "Confirm scope, currency, TCO, and overlap ownership before including it in Executive Output.") : (language === "zh" ? "完成客户基线与财务/业务负责人验证，再升级为 E2。" : language === "es" ? "Complete la línea base del cliente y la validación del responsable financiero/operativo antes de elevarlo a E2." : "Complete the customer baseline and finance/operational-owner validation before promoting to E2.")}</p></div>
     </div>
   </section>;
 }

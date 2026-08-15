@@ -226,3 +226,40 @@
 - **Classic separation rule：** `/client-brief-classic` 可继续是董事会备忘录与纸面印记；新 Cobalt Field Guide 必须优先使用地图几何、路径点与“我在哪里”的空间提示。
 - **Brand seal rule：** 路线标记是新版本的产品识别符，必须在顶栏、问卷进度及探索结果中出现，并比语言切换等工具性元素更具视觉重量。
 - **Field note rule：** 以小型蓝色路线批注重复表达关键方法论，例如“从一条真实运输流开始”，让页面读作顾问正在标记一张探索地图，而非营销着陆页。
+
+---
+
+## Assessment Runway — 主 Dashboard 引导层
+
+### Design Movement
+
+保留 Decision Archive 的**证据档案室**视觉血缘，但将页面顶端改造成一条“任务跑道”。它不替代档案库，而是让顾问先选择本次客户会议要解决的一个问题，再被清楚地带到正确的档案、Discovery、证据门控与 ROI 工作区。
+
+### Core Principles
+
+1. **工作优先于展示。** 首屏先给出 `Start Assessment`，而不是先要求理解十五个价值域。
+2. **痛点决定路径，不是编号决定路径。** 用户从费用完整性、可视化／异常或更广 One Oracle 问题出发；系统再推荐受控的起始 driver。
+3. **状态解释下一步。** 每一阶段必须显示“已完成什么、现在缺什么、点击后会去哪里”。
+4. **证据规则不可被 UI 绕过。** E0/E1 只显示为机会范围，E2/E3 才解锁 Base ROI 与高管输出。
+
+### Layout Paradigm
+
+在现有 Hero 之后、价值档案库之前插入一段横向 **Assessment Runway**。左侧是当前客户问题与推荐 Driver，中央是一条从 `Problem → Driver → Discovery → Evidence → ROI → Output` 延伸的六步跑道，右侧是一张当前任务卡。点击任何步骤会滚动至既有工作区，并将当前状态写入跑道。旧有长页面模块仍保留在跑道下方，变成“按路径展开”的工作台而非孤立内容。
+
+### Signature Elements
+
+1. **Runway Marker：** Archive Vermilion 的细线路径与编号舱位，表示当前工作位置；不是进度百分比。
+2. **Evidence Lock：** Evidence 阶段以锁定／解锁的文字状态表达 E0–E3 对 ROI 的影响。
+3. **Next Move Card：** 跑道右侧只有一个具体动作，带出该动作目的与预期产出。
+
+### Interaction Philosophy
+
+用户先选一个痛点，再由系统选择初始 Driver 并高亮档案卡。点击 `Begin Discovery` 会移动到对应 Discovery File；点击 `Review evidence gate` 会进入当前 driver 的证据面板；只有当前 gate 进入 E2/E3 时，`Open ROI workspace` 才显示为可推进动作。非 Phase 1 痛点不假装有统一问卷，而是被引导到更广的 Value Library 做单独 Discovery。
+
+### Typography and Color
+
+沿用 Decision Archive 的 DM Serif Display、Noto Sans SC 与 IBM Plex Mono；使用暖象牙底、深蓝灰正文、Archive Vermilion 作跑道与当前动作唯一强调。新引导层不引入 Client Brief 的 Cobalt Blue，避免两种产品角色混淆。
+
+### Copy Rules
+
+按钮必须是动作加目的地：`选择价值路径`、`开始 Discovery`、`审阅 Evidence Gate`、`打开 ROI 工作区`、`生成输出`。每个步骤的说明只回答：**这一步要做什么、完成后得到什么、下一步是什么。**

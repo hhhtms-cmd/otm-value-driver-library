@@ -147,3 +147,82 @@
 - `Validate first. Decide second.` 是客户版的常驻微型承诺；它应读作董事会决策纸的批注，而不能被处理成营销口号。
 - 客户版首页必须同时出现主决策、决策请求、三个事实、数据位置和唯一动作，使首屏完整读作一张批准备忘录。
 - 自诊断结果优先采用“验证准备度轨道图”：四项必要条件围绕中心验证动作呈现，实心蓝点表示可开始、虚线蓝点表示需确认；不使用红黄绿评分、百分比或财务图表。
+
+---
+
+## Client Brief v2 — 重做方向
+
+### 三种候选方向
+
+| Theme Name | Very Brief Intro | Probability |
+|---|---|---:|
+| **Cobalt Field Guide** | 把 OTM 评估做成一张高质感的“探索路线图”：客户沿着一条可见的路径完成六个判断，在终点得到三个信号的探索地图。它比备忘录更有生命力，但仍然克制、专业。 | 0.07 |
+| **Blue Room** | 以极大留白、超大排版和一层层半透明蓝色玻璃组织内容，像高管专属的数字咨询室。它突出讨论氛围与安静的判断。 | 0.04 |
+| **Signal Notebook** | 以简洁的工作笔记和动态标记组织问题，强调“看见问题”而不是“得到分数”。它更偏编辑化、轻量化与可打印感。 | 0.09 |
+
+### 已选方向：Cobalt Field Guide
+
+#### Design Movement
+
+采用**当代信息地图（Contemporary Information Cartography）与高端产品导览（premium product onboarding）**的交汇，而不是瑞士式备忘录。页面像一张正在被标注的探索图：客户不是被审阅，而是在与顾问共同定位“该从哪里开始探索”。
+
+#### Core Principles
+
+1. **先定位，再判断。** 六题不是考试；每题只为标记一个探索信号，最终形成可理解的方向图。
+2. **一屏只处理一个心理动作。** 首页负责降低门槛，问卷负责回答问题，结果负责明确下一步，三者不混杂。
+3. **视觉承担解释工作。** 线、点、分区和路径先让客户“看懂自己在哪”，文字只补充必要的含义。
+4. **不把早期探索伪装成结论。** 不显示 ROI、百分比、红黄绿评分或购买建议；显示的是“值得探索／先澄清／暂缓”的对话位置。
+
+#### Color Philosophy
+
+以**雾白纸面**承载轻盈感，以 **Cobalt Blue #1155CC** 作为唯一活跃色，以深海蓝灰而非黑色承载正文，以极浅蓝渐层标记路径与层次。蓝色不做装饰性渐变；它只用于路径、选择、边界和可前进的动作，因此每一次蓝色出现都表示“这里可被推进”。
+
+#### Layout Paradigm
+
+不使用传统居中 Hero 或卡片网格。首页采用**左侧叙事、右侧路线图**的不对称分栏；问卷采用**全屏单题舞台**，左侧是当下问题，右侧持续展示已走过的六个路标；结果采用**三段式探索地图**，将 Operating Need、Digital Foundation 与 Mobilisation Ability 作为可读的地形带，而不是仪表盘指标。
+
+#### Signature Elements
+
+1. **Cobalt Route：** 一条在首页、问卷和结果间保持连续的蓝色路径，已回答节点实心、待回答节点空心。
+2. **Exploration Map：** 结果中的三条纵向地形带，以信号聚合而非百分比分数表达“现在在哪里”。
+3. **Field Note：** 每一阶段只出现一句小型蓝色批注，例如 `Start with one real flow.`，替代营销式宣言。
+
+#### Interaction Philosophy
+
+点击答案时，路径立即填充并短暂推进；不是提交表单，也不是考试答题。用户可回退修正，答案只存储在自己的设备。结果页只有一个主动作：**安排一次 45 分钟的 OTM exploration conversation**；保存、分享、下载和查看旧版均是安静的次级动作。
+
+#### Animation
+
+路径节点以 180ms 的渐显和位移回应选择；进入下一题时内容从右侧以 220ms 轻微滑入，历史路径保持稳定，不做整页翻转。结果地图中的三条地形带在首次出现时自下而上描绘；所有动画遵守 reduced-motion，并只使用 opacity 与 transform。
+
+#### Typography System
+
+英文展示标题采用 **Fraunces** 的柔和雕塑感；中文展示标题仍用 **Noto Serif SC**，正文沿用 **Noto Sans SC**；路径标记、问题编号和技术性提示使用 **IBM Plex Mono**。大标题允许三至四行，以产生呼吸感；问题正文保持 40–60 个字符的易读行宽。
+
+#### Brand Essence
+
+**定位：** 一个把 OTM 的复杂选择收束为六个可信信号和一条可行动探索路径的客户决策入口。  
+**人格：** 从容、清晰、前瞻。
+
+#### Brand Voice
+
+语气像一位善于梳理复杂问题的顾问：不推销、不恐吓、不承诺结果，只把下一步讲清楚。示例：`Start with one real transport flow, not the whole enterprise.` 与 `You do not need perfect data to know what to explore next.`
+
+#### Wordmark & Logo
+
+使用一个由三条相连的蓝色路线组成的抽象路径符号：左侧为起点圆点，中部折线表示判断，右侧开放端代表下一步。它不使用默认文字 Logo，而以符号与小型 `OTM Exploration` 字标共同出现。
+
+#### Signature Brand Color
+
+**Cobalt Route Blue — #1155CC**。它只标识可被客户推进、选择或确认的部分。
+
+#### Client Brief v2 内容架构
+
+新版本默认使用 `/client-brief`；既有版本将保留在 `/client-brief-classic`，使客户团队能够直接比较两种体验。六个问题围绕三条通用信号组织：**Operating Need**（真实痛点、可界定起点），**Digital Foundation**（能识别系统与数据轨迹），以及 **Mobilisation Ability**（业务、数据和决策方能够共同开启一次受边界约束的探索）。特殊行业的跨境、合规、私有车队或文件义务作为可选“operational nuance”补充，而不污染所有客户的基础问题。
+
+#### Style Decisions
+
+- **Cobalt Route rule：** 首屏、问卷与结果都必须出现一条连续的 Cobalt Route，含可见的起点、过程与目的地节点；孤立列表或盒子不能替代路线本身。
+- **Classic separation rule：** `/client-brief-classic` 可继续是董事会备忘录与纸面印记；新 Cobalt Field Guide 必须优先使用地图几何、路径点与“我在哪里”的空间提示。
+- **Brand seal rule：** 路线标记是新版本的产品识别符，必须在顶栏、问卷进度及探索结果中出现，并比语言切换等工具性元素更具视觉重量。
+- **Field note rule：** 以小型蓝色路线批注重复表达关键方法论，例如“从一条真实运输流开始”，让页面读作顾问正在标记一张探索地图，而非营销着陆页。

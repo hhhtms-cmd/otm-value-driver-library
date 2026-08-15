@@ -32,6 +32,8 @@ type Copy = {
   focusOptions: FocusOption[];
   startingPoint: string;
   bringLabel: string;
+  workbenchLabel: string;
+  workbenchNote: string;
   routeKicker: string;
   routeTitle: string;
   routeSteps: [string, string, string];
@@ -90,6 +92,7 @@ const COPY: Record<Language, Copy> = {
       { id: "other", title: "Another transport or trade question", detail: "The first conversation may concern planning, carriers, network, compliance or trade operations.", bring: "Bring one concrete process example and the name of the person who understands it best." },
     ],
     startingPoint: "YOUR STARTING POINT", bringLabel: "BRING TO THE CONVERSATION",
+    workbenchLabel: "Open Decision Archive internal workbench", workbenchNote: "For presales, consulting and finance teams: value drivers, Discovery, evidence, ROI and export.",
     routeKicker: "YOUR EXPLORATION ROUTE",
     routeTitle: "One route. Three signals.",
     routeSteps: ["A real operating need", "A visible digital foundation", "The ability to mobilise a small next step"],
@@ -157,6 +160,7 @@ const COPY: Record<Language, Copy> = {
       { id: "other", title: "其他运输或贸易问题", detail: "第一次对话可能涉及规划、承运商、网络、合规或贸易运营。", bring: "带来一个具体流程案例，以及最了解该流程的人员姓名。" },
     ],
     startingPoint: "你的探索起点", bringLabel: "下一次对话请带来",
+    workbenchLabel: "打开 Decision Archive 内部工作台", workbenchNote: "供售前、咨询与财务团队使用：价值 Driver、Discovery、证据、ROI 与导出。",
     routeKicker: "你的探索路线",
     routeTitle: "一条路线，三个信号。",
     routeSteps: ["一个真实的运营需求", "一条看得见的数字基础", "推进一个小步骤的能力"],
@@ -224,6 +228,7 @@ const COPY: Record<Language, Copy> = {
       { id: "other", title: "Otra pregunta de transporte o comercio", detail: "La primera conversación puede tratar planificación, carriers, red, cumplimiento u operaciones comerciales.", bring: "Traiga un ejemplo concreto de proceso y el nombre de la persona que mejor lo conoce." },
     ],
     startingPoint: "SU PUNTO DE PARTIDA", bringLabel: "TRAIGA A LA CONVERSACIÓN",
+    workbenchLabel: "Abrir Decision Archive interno", workbenchNote: "Para preventa, consultoría y finanzas: drivers de valor, Discovery, evidencia, ROI y exportación.",
     routeKicker: "SU RUTA DE EXPLORACIÓN",
     routeTitle: "Una ruta. Tres señales.",
     routeSteps: ["Una necesidad operativa real", "Una base digital visible", "La capacidad de movilizar un siguiente paso pequeño"],
@@ -399,6 +404,7 @@ export default function ClientBriefV2() {
           <div className="field-language" aria-label={copy.language}>
             {LANGUAGES.map((item) => <button type="button" key={item.id} className={language === item.id ? "active" : ""} onClick={() => setLanguage(item.id)} aria-pressed={language === item.id}>{item.label}</button>)}
           </div>
+          <button type="button" className="workbench-shortcut" onClick={() => navigate("/workbench")}>{copy.workbenchLabel}<ArrowRight size={14} strokeWidth={1.8} /></button>
         </div>
       </header>
 
@@ -416,6 +422,9 @@ export default function ClientBriefV2() {
             <button type="button" className="field-secondary field-unsure-start" onClick={() => start(null)}>{copy.startUnsure}<ArrowRight size={16} strokeWidth={1.8} /></button>
           </div>
           <p className="field-note">{copy.startNote}</p>
+          <button type="button" className="field-workbench-bridge" onClick={() => navigate("/workbench")}>
+            <span>DECISION ARCHIVE / INTERNAL WORKBENCH</span><strong>{copy.workbenchLabel}</strong><p>{copy.workbenchNote}</p><ArrowRight size={17} strokeWidth={1.8} />
+          </button>
         </div>
         <aside className="field-route-map" aria-label={copy.routeKicker}>
           <div className="route-map-top"><span>{copy.routeKicker}</span><b>01—06</b></div>

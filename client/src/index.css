@@ -169,3 +169,42 @@
 .narrative-art { position: relative; border: 1px solid rgba(255,250,242,.25); }.narrative-art::before { position: absolute; z-index: 1; top: 12px; left: 12px; border-left: 2px solid #d84a36; border-top: 1px solid rgba(255,250,242,.48); background: rgba(18,25,35,.7); padding: 5px 8px; color: #efc7bb; font-family: "IBM Plex Mono",monospace; font-size: 7px; letter-spacing: .09em; content: "FILE / 04 · EVIDENCE MATERIAL"; }.narrative-art::after { position: absolute; z-index: 1; right: 12px; bottom: 12px; border: 1px solid rgba(255,250,242,.35); background: rgba(18,25,35,.66); padding: 4px 6px; color: #d6d0c7; font-family: "IBM Plex Mono",monospace; font-size: 7px; letter-spacing: .07em; content: "SOURCE · NARRATIVE LAYER"; }.narrative-art img { opacity: .82; filter: saturate(.74) contrast(.94); }
 @media (max-width: 1050px) { .value-row { grid-template-columns: 55px minmax(155px,1fr) minmax(160px,1.1fr) 104px 25px; }.value-row .status-label { min-width: 0; } }.value-row .status-label { display: inline-flex; }
 @media (max-width: 760px) { .roi-heading-mark { min-width: 0; padding-left: 7px; }.roi-heading-mark img { width: 29px; height: 29px; }.roi-heading-mark::after { display: none; }.narrative-art::before,.narrative-art::after { font-size: 6px; }.value-row { grid-template-columns: 43px 1fr 18px; padding-bottom: 12px; }.value-row .status-label { grid-column: 2; grid-row: 2; width: fit-content; margin-top: -3px; }.value-row .row-arrow { grid-column: 3; grid-row: 1; } }
+
+/* Deep-tool responsive repair: below a wide desktop, a fixed catalogue must never squeeze Chinese content into narrow columns. */
+.deep-mode-actions { display: flex; align-items: center; gap: 14px; }.deep-mode-actions button { border: 0; background: transparent; color: #d84a36; font-family: "IBM Plex Mono",monospace; font-size: 8px; letter-spacing: .05em; }.deep-mode-actions .deep-directory-jump { display: none; color: #58626d; }
+@media (max-width: 1550px) {
+  .archive-deep-open .sidebar-rail { display: none; }
+  .archive-deep-open .page-main { margin-left: 0; }
+  .archive-deep-open .deep-mode-bar { padding-left: 54px; padding-right: 54px; }
+  .archive-deep-open .deep-directory-jump { display: inline-block; }
+  .archive-deep-open .roi-workspace { grid-template-columns: 1fr; }
+  .archive-deep-open .roi-summary-panel { border-top: 1px solid rgba(255,250,242,.28); }
+  .archive-deep-open .roi-import-dossier,.archive-deep-open .roi-scenario-dossier { grid-template-columns: 1fr; }
+  .archive-deep-open .assessment-grid,.archive-deep-open .view-layout,.archive-deep-open .narrative-grid,.archive-deep-open .overlap-dossier { grid-template-columns: 1fr; }
+  .archive-deep-open .assessment-image { min-height: 360px; }
+  .archive-deep-open .narrative-art { min-height: 300px; border-left: 0; border-top: 1px solid rgba(255,250,242,.22); }
+  .archive-deep-open .view-statement { position: static; }
+  .archive-deep-open .value-row { grid-template-columns: minmax(250px,.9fr) minmax(340px,1.45fr) minmax(130px,.55fr) 25px; gap: 18px; }
+  .archive-deep-open .roi-selection-panel::before,.archive-deep-open .roi-summary-panel::before { display: none; }
+}
+@media (max-width: 1150px) {
+  .archive-deep-open .section-wrap { padding-left: 44px; padding-right: 44px; }
+  .archive-deep-open .value-row { grid-template-columns: minmax(220px,1fr) minmax(180px,1.1fr) 25px; gap: 14px; }
+  .archive-deep-open .value-row .status-label { display: none; }
+  .archive-deep-open .detail-drawer { grid-template-columns: 1fr; }
+  .archive-deep-open .detail-aside { border-top: 1px solid rgba(255,250,242,.22); border-left: 0; padding-top: 20px; padding-left: 0; }
+  .archive-deep-open .section-lead { grid-template-columns: 1fr; gap: 18px; }
+  .archive-deep-open .section-intro { max-width: 640px; }
+}
+@media (max-width: 760px) {
+  .archive-deep-open .deep-mode-bar { padding-left: 24px; padding-right: 24px; }
+  .deep-mode-actions { gap: 11px; }
+  .archive-deep-open .value-row { grid-template-columns: minmax(0,1fr) 18px; gap: 8px; min-height: 0; padding: 15px 0 15px 13px; }
+  .archive-deep-open .value-row .value-description { display: none; }
+  .archive-deep-open .value-row .status-label { grid-column: 1; grid-row: 2; display: inline-flex; width: fit-content; margin-top: 0; }
+  .archive-deep-open .value-row .row-arrow { grid-column: 2; grid-row: 1; }
+  .archive-deep-open .roi-input-grid,.archive-deep-open .roi-import-actions { grid-template-columns: 1fr; }
+  .archive-deep-open .roi-scenario-form { grid-template-columns: 1fr; }
+  .archive-deep-open .assessment-content { padding: 36px 24px; }
+  .archive-deep-open .assessment-image { min-height: 250px; }
+}

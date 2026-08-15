@@ -1,8 +1,9 @@
 /* Design reminder: "验证简报 / Validation Brief" — quiet luxury client decision paper; one decision, one blue hue, progressive disclosure, no archive-density or dark dashboard styling. */
-import { useMemo, useState } from "react";
-import { ArrowRight, Check, ChevronDown, CircleHelp, FileCheck2, Languages, ListChecks, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Check, ChevronDown, CircleHelp, FileCheck2, ListChecks, ShieldCheck } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import ClientReadinessDiagnostic from "@/components/ClientReadinessDiagnostic";
 import "./ClientValidationBrief.css";
 
 type Copy = {
@@ -23,6 +24,7 @@ type Copy = {
   dataBody: string;
   dataPoints: [string, string, string];
   cta: string;
+  diagnosticCta: string;
   planKicker: string;
   planTitle: string;
   planBody: string;
@@ -54,6 +56,7 @@ const COPY: Record<Language, Copy> = {
     dataBody: "We have sufficient context to define a bounded Phase 1. Three inputs will unlock the next decision.",
     dataPoints: ["Confirm the operating population", "Assign Wave 1 data owners", "Agree Finance treatment"],
     cta: "Review the validation plan",
+    diagnosticCta: "Start a 5-minute validation check",
     planKicker: "THE NEXT SMALL STEP",
     planTitle: "A three-part validation plan",
     planBody: "Each action is deliberately small, owned and reversible. No financial result is created by completing these steps; they only make the evidence review possible.",
@@ -87,6 +90,7 @@ const COPY: Record<Language, Copy> = {
     dataBody: "现有信息足以界定一个有边界的第一阶段。三个输入将解锁下一项决策。",
     dataPoints: ["确认运营人口", "指定 Wave 1 数据 owner", "确认 Finance 处理规则"],
     cta: "查看验证计划",
+    diagnosticCta: "开始 5 分钟验证检查",
     planKicker: "下一个小步骤",
     planTitle: "三部分验证计划",
     planBody: "每一步都刻意保持小、明确责任、可逆。完成这些步骤不会产生任何财务结论；它们只让证据审阅成为可能。",
@@ -120,6 +124,7 @@ const COPY: Record<Language, Copy> = {
     dataBody: "Hay contexto suficiente para definir una Fase 1 acotada. Tres insumos desbloquearán la próxima decisión.",
     dataPoints: ["Confirmar la población operativa", "Asignar responsables de datos Wave 1", "Acordar el tratamiento de Finanzas"],
     cta: "Revisar el plan de validación",
+    diagnosticCta: "Iniciar un check de validación de 5 minutos",
     planKicker: "EL PRÓXIMO PASO PEQUEÑO",
     planTitle: "Un plan de validación en tres partes",
     planBody: "Cada acción es pequeña, tiene responsable y es reversible. Completarlas no crea un resultado financiero; solo hace posible la revisión de evidencia.",
@@ -149,7 +154,7 @@ export default function ClientValidationBrief() {
   const copy = COPY[language];
   const [planOpen, setPlanOpen] = useState(false);
   const [activeStep, setActiveStep] = useState<number | null>(null);
-  const activeStepCopy = useMemo(() => activeStep === null ? null : copy.steps[activeStep], [activeStep, copy.steps]);
+  const [diagnosticOpen, setDiagnosticOpen] = useState(false);
 
   const openPlan = () => {
     setPlanOpen(true);
@@ -206,8 +211,8 @@ export default function ClientValidationBrief() {
           <div className="data-position-points">
             {copy.dataPoints.map((point) => <div key={point}><FileCheck2 size={15} strokeWidth={1.8} /><span>{point}</span></div>)}
           </div>
-          <button className="validation-cta" type="button" onClick={openPlan} aria-expanded={planOpen} aria-controls="validation-plan">
-            <span>{copy.cta}</span><ArrowRight size={18} strokeWidth={1.8} />
+          <button className="validation-cta" type="button" onClick={() => setDiagnosticOpen(true)} aria-haspopup="dialog">
+            <span>{copy.diagnosticCta}</span><ArrowRight size={18} strokeWidth={1.8} />
           </button>
         </section>
 
@@ -227,6 +232,7 @@ export default function ClientValidationBrief() {
           <p><CircleHelp size={15} strokeWidth={1.7} /> {copy.noFinancial}</p>
           <button type="button" onClick={() => navigate("/")}><ListChecks size={15} strokeWidth={1.7} /> {copy.archiveLink}</button>
         </footer>
+        <ClientReadinessDiagnostic language={language} open={diagnosticOpen} onClose={() => setDiagnosticOpen(false)} onReviewPlan={() => { setDiagnosticOpen(false); openPlan(); }} />
       </div>
     </main>
   );

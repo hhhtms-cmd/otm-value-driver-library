@@ -12,6 +12,8 @@ An all-`not yet` run was also checked. The plan showed Scope, Evidence, Data Own
 
 The page was then switched from Spanish to English after closing the overlay. The entire validation brief, including the five-minute diagnostic primary action, updated to the English copy. The language state continues to use the shared application selector.
 
+After the visual result update, an all-`not yet` English run rendered the Validation Readiness orbit with four open/dashed blue condition points and a concise action lane: define the first population, request the evidence set, and name the data owners. The result contained no percentage score, traffic-light color, ROI, or purchase recommendation.
+
 ## Boundary
 
 The prototype deliberately produces a readiness and action plan, not an ROI, purchase recommendation, or customer financial claim. Share and download use browser-native behavior and should be confirmed by the user in their chosen browser when the site is live.

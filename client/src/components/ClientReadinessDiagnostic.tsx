@@ -6,6 +6,8 @@ import "@/pages/ClientValidationBrief.css";
 
 type Answer = "yes" | "partial" | "no";
 type Answers = Record<string, Answer | undefined>;
+type ReadinessKey = "scope" | "evidence" | "owners" | "finance";
+type ActionKey = ReadinessKey | "priority";
 
 type DiagnosticCopy = {
   eyebrow: string;
@@ -35,6 +37,13 @@ type DiagnosticCopy = {
   finishLine: string;
   readyActions: [string, string];
   summaryLabels: { scope: string; evidence: string; owners: string; finance: string };
+  visualKicker: string;
+  visualReadyTitle: string;
+  visualReadyBody: string;
+  visualNeedsTitle: string;
+  visualNeedsBody: string;
+  actionKicker: string;
+  actionShort: Record<ActionKey, string>;
 };
 
 const COPY: Record<Language, DiagnosticCopy> = {
@@ -73,6 +82,13 @@ const COPY: Record<Language, DiagnosticCopy> = {
     finishLine: "Validate first. Decide second.",
     readyActions: ["Set a short evidence-delivery window with the named data owners.", "Schedule a Finance validation checkpoint after the evidence review."],
     summaryLabels: { scope: "Scope", evidence: "Evidence", owners: "Data ownership", finance: "Finance treatment" },
+    visualKicker: "VALIDATION POSITION",
+    visualReadyTitle: "Ready to begin evidence validation.",
+    visualReadyBody: "The starting conditions are in place. Coordinate the evidence window, then let Finance review the result.",
+    visualNeedsTitle: "Unlock the next evidence step.",
+    visualNeedsBody: "Follow the open blue points below. You do not need to solve every condition today.",
+    actionKicker: "THE NEXT MOVE",
+    actionShort: { scope: "Define the first population", evidence: "Request the evidence set", owners: "Name the data owners", finance: "Invite the Finance partner", priority: "Choose one first focus" },
   },
   zh: {
     eyebrow: "5 分钟验证检查",
@@ -109,6 +125,13 @@ const COPY: Record<Language, DiagnosticCopy> = {
     finishLine: "先验证，再决定。",
     readyActions: ["与已明确的数据 owner 约定一个短的证据交付窗口。", "在证据审阅后安排一次 Finance 验证检查点。"],
     summaryLabels: { scope: "范围", evidence: "证据", owners: "数据负责人", finance: "Finance 处理规则" },
+    visualKicker: "验证位置",
+    visualReadyTitle: "可以开始证据验证。",
+    visualReadyBody: "起始条件已经具备。先协调证据交付窗口，再让 Finance 审阅结果。",
+    visualNeedsTitle: "解锁下一步证据动作。",
+    visualNeedsBody: "先跟进下方的蓝色开放点。今天不需要解决所有条件。",
+    actionKicker: "下一步动作",
+    actionShort: { scope: "界定第一批人口", evidence: "请求证据数据集", owners: "明确数据负责人", finance: "邀请 Finance 伙伴", priority: "选择一个首要问题" },
   },
   es: {
     eyebrow: "CHECK DE VALIDACIÓN DE CINCO MINUTOS",
@@ -145,6 +168,13 @@ const COPY: Record<Language, DiagnosticCopy> = {
     finishLine: "VALIDAR PRIMERO. DECIDIR DESPUÉS.",
     readyActions: ["Acordar una ventana corta de entrega de evidencia con los responsables de datos nombrados.", "Programar un punto de control de Finanzas después de revisar la evidencia."],
     summaryLabels: { scope: "Alcance", evidence: "Evidencia", owners: "Responsables de datos", finance: "Tratamiento de Finanzas" },
+    visualKicker: "POSICIÓN DE VALIDACIÓN",
+    visualReadyTitle: "Listo para comenzar la validación de evidencia.",
+    visualReadyBody: "Las condiciones iniciales están en su sitio. Coordine la ventana de evidencia y luego deje que Finanzas revise el resultado.",
+    visualNeedsTitle: "Desbloquee el siguiente paso de evidencia.",
+    visualNeedsBody: "Siga los puntos azules abiertos que aparecen abajo. No necesita resolver cada condición hoy.",
+    actionKicker: "EL PRÓXIMO MOVIMIENTO",
+    actionShort: { scope: "Definir la primera población", evidence: "Solicitar el conjunto de evidencia", owners: "Nombrar responsables de datos", finance: "Invitar al socio de Finanzas", priority: "Elegir un primer foco" },
   },
 };
 
@@ -154,14 +184,37 @@ function answerStatus(answer: Answer | undefined, copy: DiagnosticCopy) {
   return answer === "yes" ? copy.ready : copy.needs;
 }
 
+function evidenceAnswer(answers: Answers): Answer | undefined {
+  if (answers.spend === "yes" && answers.shipment === "yes") return "yes";
+  if (answers.spend === "no" || answers.shipment === "no") return "no";
+  return answers.spend || answers.shipment;
+}
+
+function buildReadiness(answers: Answers, copy: DiagnosticCopy) {
+  const values: Array<{ key: ReadinessKey; answer: Answer | undefined }> = [
+    { key: "scope", answer: answers.scope },
+    { key: "evidence", answer: evidenceAnswer(answers) },
+    { key: "owners", answer: answers.owners },
+    { key: "finance", answer: answers.finance },
+  ];
+  return values.map((item) => ({ ...item, label: copy.summaryLabels[item.key], ready: item.answer === "yes" }));
+}
+
+function buildActionKeys(answers: Answers): ActionKey[] {
+  const actions: ActionKey[] = [];
+  if (answers.scope !== "yes") actions.push("scope");
+  if (evidenceAnswer(answers) !== "yes") actions.push("evidence");
+  if (answers.owners !== "yes") actions.push("owners");
+  if (answers.finance !== "yes") actions.push("finance");
+  if (answers.priority !== "yes") actions.push("priority");
+  return actions.length ? actions.slice(0, 3) : ["evidence", "finance"];
+}
+
 function buildActions(answers: Answers, copy: DiagnosticCopy) {
-  const actions: string[] = [];
-  if (answers.scope !== "yes") actions.push(copy.questions[0].prompt);
-  if (answers.spend !== "yes" || answers.shipment !== "yes") actions.push(copy.questions[1].prompt);
-  if (answers.owners !== "yes") actions.push(copy.questions[3].prompt);
-  if (answers.finance !== "yes") actions.push(copy.questions[4].prompt);
-  if (answers.priority !== "yes") actions.push(copy.questions[5].prompt);
-  return actions.length ? actions.slice(0, 3) : copy.readyActions;
+  const questionIndex: Record<ActionKey, number> = { scope: 0, evidence: 1, owners: 3, finance: 4, priority: 5 };
+  const actionKeys = buildActionKeys(answers);
+  const isAllReady = actionKeys[0] === "evidence" && actionKeys[1] === "finance" && buildReadiness(answers, copy).every((item) => item.ready);
+  return isAllReady ? copy.readyActions : actionKeys.map((key) => copy.questions[questionIndex[key]].prompt);
 }
 
 function formatPlan(copy: DiagnosticCopy, answers: Answers) {
@@ -185,6 +238,9 @@ export default function ClientReadinessDiagnostic({ language, open, onClose, onR
   const complete = Object.keys(answers).length === copy.questions.length;
   const progress = ((step + 1) / copy.questions.length) * 100;
   const planText = useMemo(() => formatPlan(copy, answers), [answers, copy]);
+  const readiness = buildReadiness(answers, copy);
+  const readyCount = readiness.filter((item) => item.ready).length;
+  const actionKeys = buildActionKeys(answers);
 
   useEffect(() => {
     if (!open) return;
@@ -236,15 +292,14 @@ export default function ClientReadinessDiagnostic({ language, open, onClose, onR
           <div className="diagnostic-head"><span>{copy.planEyebrow}</span><b>{copy.finishLine}</b></div>
           <h2 id="diagnostic-title">{copy.planTitle}</h2>
           <p className="diagnostic-intro">{copy.planIntro}</p>
-          <div className="readiness-summary">
-            {([
-              ["scope", copy.summaryLabels.scope, answers.scope],
-              ["evidence", copy.summaryLabels.evidence, answers.spend],
-              ["owners", copy.summaryLabels.owners, answers.owners],
-              ["finance", copy.summaryLabels.finance, answers.finance],
-            ] as const).map(([key, label, answer]) => <div key={key}><span>{label}</span><strong className={answer === "yes" ? "ready" : "needs"}>{answerStatus(answer, copy)}</strong></div>)}
+          <div className="readiness-visual">
+            <div className={`readiness-orbit ${readyCount === 4 ? "all-ready" : "needs-work"}`} aria-label={copy.visualKicker}>
+              <div className="orbit-core"><span>{copy.visualKicker}</span><strong>{readyCount === 4 ? copy.ready : copy.needs}</strong><i /></div>
+              {readiness.map((item) => <div key={item.key} className={`orbit-node node-${item.key} ${item.ready ? "ready" : "needs"}`}><i /><span>{item.label}</span></div>)}
+            </div>
+            <div className="readiness-story"><span>{copy.visualKicker}</span><h3>{readyCount === 4 ? copy.visualReadyTitle : copy.visualNeedsTitle}</h3><p>{readyCount === 4 ? copy.visualReadyBody : copy.visualNeedsBody}</p></div>
           </div>
-          <div className="readiness-actions"><span>{copy.actions}</span>{buildActions(answers, copy).map((action, index) => <p key={action}><b>0{index + 1}</b>{action}</p>)}</div>
+          <div className="readiness-actions"><span>{copy.actionKicker}</span><div className="action-lane">{actionKeys.map((key, index) => <div key={key}><b>0{index + 1}</b><strong>{copy.actionShort[key]}</strong><i className={key === "scope" || key === "evidence" || key === "owners" || key === "finance" ? "line" : ""} /></div>)}</div></div>
           <div className="plan-utilities"><button type="button" onClick={save}><Save size={15} />{copy.save}</button><button type="button" onClick={share}><Share2 size={15} />{copy.share}</button><button type="button" onClick={download}><Download size={15} />{copy.download}</button></div>
           {feedback && <p className="diagnostic-feedback">{feedback}</p>}
           <div className="diagnostic-actions plan-finish"><button type="button" onClick={restart}>{copy.restart}</button><button type="button" className="diagnostic-primary" onClick={onReviewPlan}>{copy.reviewPlan}<ArrowRight size={16} /></button></div>

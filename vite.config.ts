@@ -203,9 +203,17 @@ function vitePluginStorageProxy(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  vitePluginStorageProxy(),
+];
+
 export default defineConfig({
-  base: '/otm-value-driver-library/',
+  base: "/otm-value-driver-library/",
   plugins,
   resolve: {
     alias: {
@@ -217,7 +225,7 @@ export default defineConfig({
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "../dist"),
+    outDir: "../dist",
     emptyOutDir: true,
   },
   server: {

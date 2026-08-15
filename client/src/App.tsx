@@ -13,13 +13,13 @@ import ClientBriefV2 from "./pages/ClientBriefV2";
 
 function Router() {
   return (
-    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+    <WouterRouter base="/otm-value-driver-library">
       <Switch>
-        <Route path={"/client-brief"} component={ClientBriefV2} />
-        <Route path={"/client-brief-classic"} component={ClientValidationBrief} />
-        <Route path={"/workbench"} component={Home} />
-        <Route path={"/"} component={Home} />
-        <Route path={"/404"} component={NotFound} />
+        <Route path="/client-brief" component={ClientBriefV2} />
+        <Route path="/client-brief-classic" component={ClientValidationBrief} />
+        <Route path="/workbench" component={Home} />
+        <Route path="/" component={Home} />
+        <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />
       </Switch>

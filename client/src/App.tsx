@@ -6,11 +6,13 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import ClientValidationBrief from "./pages/ClientValidationBrief";
 
 
 function Router() {
   return (
     <Switch>
+      <Route path={"/client-brief"} component={ClientValidationBrief} />
       <Route path={"/"} component={Home} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

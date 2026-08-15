@@ -52,3 +52,47 @@
 - [x] 定义客户版 PPT 的已验证 Base ROI、范围、TCO、证据与决策内容结构。
 - [x] 实现浏览器端 PowerPoint 生成器与 Executive Output 导出入口。
 - [x] 验证下载的 PPT 内容、门控规则和中英西界面兼容性。
+- [x] 审阅客户 OTM 实施 Discovery 问卷，并提炼可复用的诊断主题与决策逻辑。
+- [x] 对照 One Oracle 评估模板，提出可采纳、需隔离与不建议照搬的改进建议。
+- [x] 定义 GTM 条件触发、排除与进入 Base ROI 的控制规则。
+- [x] 设计下一版 One Oracle Assessment Dashboard 的完整信息架构与数据流。
+- [x] 将客户 OTM 实施问卷的核心问题整合为可分支的 Discovery File / 00 模板。
+- [x] 更新英文 ROI Spreadsheet，纳入 Discovery File / 00、GTM Trigger Gate、Candidate Portfolio、Scope Tuple 与强化的 Base ROI 控制。
+- [x] 更新英文 Business Case PPT，纳入 Discovery 前置层、GTM 条件触发、范围纪律与新版决策路径。
+- [x] 验证新版英文 Spreadsheet 公式、现金流门控、PPT 页面与交付文件可用性。
+- [x] 根据 Copilot 建议确定 IBM TLS Freight Audit 与 High-Level Visibility 混合版模型的范围、保留项与排除项。
+- [x] 生成聚焦 IBM TLS OTM Discovery、数据收集、Freight Audit、Visibility、E0–E3 与 Base ROI 门控的英文 Spreadsheet。
+- [x] 验证混合版 Spreadsheet 的输入审计、重复计算控制、TCO 完整性与 Base ROI 公式。
+- [x] 将 IBM TLS Hybrid v1.0 定位为唯一工作主版本，并记录 v1.1 的范围与更新优先级。
+- [x] 为 v1.1 增加客户协作数据请求字段、Known/Hypothesis/Unknown Register、IBM TLS System Capability Map 与 TLS 化 Current Process。
+- [x] 将 TCO 重构为 Year 0–Year 5 分年度成本与遗留成本避免，并验证其与 Base ROI 现金流的联动。
+- [x] 生成并验证英文 IBM TLS OTM Value Assessment Working Model v1.1。
+- [x] 将 v1.1 审阅建议转化为 v1.2 的 Finance Treatment、细粒度 Baseline、活动型 Visibility 公式与数据请求更新。
+- [x] 增加更完整的 TCO 项目、逐项 Assumption Log、Workshop 问题化 KHU / System Map，并验证 Base ROI 控制。
+- [x] 将 Spreadsheet 视觉系统改为 IBM 蓝、浅蓝与低对比中性文字，去除深绿和黑色压迫感。
+- [x] 生成并验证英文 IBM TLS OTM Value Assessment Working Model v1.2。
+- [x] 核对 Copilot 对 v1.2 的版本、Base ROI 规则、Driver 数量、Assumption Log、Value Realization 与 Checks 审阅发现。
+- [x] 形成 v1.2 立即修复、Workshop 后推进和客户协作版本隔离的优先级建议。
+- [x] 生成 v1.2.1 Workshop Release，并将所有内部版本引用、Model Role、13 个 Driver 说明和完整 Base ROI 规则统一为一致口径。
+- [x] 为 Workshop Release 增加 Scope / Data Request / KHU / System Map 的现场确认指引，同时保持收益公式不变。
+- [x] 验证 v1.2.1 不含绿色、版本一致、Base ROI 说明完整且工作簿可打开。
+- [x] 审阅最新分析并确定 v1.2.2 的单一浅蓝色系、可用的饱和度层级与保留控制；该请求已由 v1.3 的完整单色浅蓝重构取代。
+- [x] 生成统一浅蓝色系的 IBM TLS OTM Workshop Release v1.2.2，移除所有绿色、深蓝和第二套强调色；该请求已由 v1.3 完整实现。
+- [x] 验证 v1.2.2 的颜色一致性、公式零改动和工作簿可用性；验证已在 v1.3 工作簿中完成。
+- [x] 以 v1.2.1 为基础生成 v1.3 的单色浅蓝导航与四层逻辑体验，不破坏既有公式和证据门控。
+- [x] 增加 Executive Dashboard、Value Bridge、Feasibility Heatmap、Decision Roadmap、使用指引和变更日志。
+- [x] 将 v1.3 的 Discovery、Value Model、Governance 与附录工作表组织为易于 Workshop 使用的导航体系。
+- [x] 验证 v1.3 无第二色系、Base ROI / TCO / Scenario 控制有效且所有计算公式可追溯。
+- [x] 审阅 IBM TLS OTM Workshop Release v1.3.3 的结构、视觉和关键控制。
+- [x] 提炼 v1.3.3 对主模型可采纳的洞见，并识别不应照搬的风险。
+- [x] 以 v1.3.3 为基础生成 v1.3.4 Control Patch，不改变既有工作簿架构或客户数据空白原则。
+- [x] 修复 Scope gate，使所有 Mandatory Scope 字段、owner 和确认状态共同决定 Scope Confirmed。
+- [x] 重写 Value Bridge 的 Capacity / Cashable 分类，并让 Critical Open Actions 阻止决策状态成为 Ready。
+- [x] 彻底移除绿色，并验证 v1.3.4 的 Base ROI、Scope、TCO、Open Actions 和公式控制。
+- [x] 定义客户版 Dashboard 首页前 10 秒的一句话、三个事实、一个主按钮及其使用边界。
+- [x] 定义客户对验证数据是否足够的优雅回应、数据就绪度状态和下一步动作。
+- [x] 绘制客户版 OTM Dashboard 极简首页的文字 Wireframe 与信息层级。
+- [x] 保留当前 Decision Archive Dashboard，并建立独立的客户版极简 UI 路由与视觉规范。
+- [x] 实现客户首页、数据就绪度回应、验证计划展开与三个下一步行动的互动路径。
+- [x] 验证新旧 UI 均可访问、客户版移动端可读且不暴露内部模型复杂度。
+- [ ] 保存并发布包含两套可比较 UI 的新版本。

@@ -143,3 +143,8 @@
 - [x] 将首屏、路径卡和 Freight Audit 任务改写为客户第一人称的自助探索与内部讨论准备体验。
 - [x] 验证客户无需理解顾问或内部术语即可完成路径，并检查中英西和手机体验。
 - [x] 保存并发布客户自助版 Decision Archive，并提供简明使用说明。
+- [x] 定义 Shipment Optimization 作为首要 OTM 自助入口的客户问题、资料准备和讨论摘要。
+- [x] 将首屏、Runway 与路径卡的第一优先级改为 Shipment Optimization，并将 Freight Audit 置为费用完整性次级路径。
+- [x] 实现 Shipment Optimization 的自助讨论任务，并保留 Freight Audit 现有任务与价值边界。
+- [x] 验证新主路径、Freight Audit 次级路径、中英西文案和手机体验。
+- [x] 保存并发布以 Shipment Optimization 为核心的客户自助 Decision Archive。

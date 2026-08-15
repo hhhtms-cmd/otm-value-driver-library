@@ -27,3 +27,9 @@ The Freight Audit task now produces a **Freight Audit Discussion Brief** for the
 ## Responsive visual check
 
 Desktop and 390px-wide mobile screenshots were reviewed after the language change. The Decision Archive hero, customer-first headline, primary exploration action, and the first path starter remain legible without text overlap. The mobile composition preserves the archive style while placing the customer’s next action within the first screen.
+
+## Shipment Optimization priority correction
+
+Shipment Optimization now appears first in the hero starter and in the Assessment Runway, ahead of Freight Audit, Visibility, and broader library exploration. Its Driver mapping is OTM / 01, so the selected library record is **Planning & Cost-to-Serve** rather than the former Freight Audit default.
+
+The Shipment Optimization task was exercised end to end in Chinese. The user can choose a live planning constraint, retain a minimum planning-information pack, choose colleagues, and generate a **Shipment Optimization Discussion Brief**. The completion state contains the expected brief and no Freight Audit heading, confirming the primary route does not fall back to the audit task.

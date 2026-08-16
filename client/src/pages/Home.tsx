@@ -73,7 +73,7 @@ export default function Home() {
 
   return (
     <div className="archive-shell">
-      <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />One Oracle Decision Archive · Your OTM Exploration</span><div className="top-ledger-tools"><a href="/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
+      <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />One Oracle Decision Archive · Your OTM Exploration</span><div className="top-ledger-tools"><a href="/otm-value-driver-library/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
       <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
         <div className="brand-block">
           <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />

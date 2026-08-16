@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch, Router as WouterRouter } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -13,7 +14,9 @@ import ClientBriefV2 from "./pages/ClientBriefV2";
 
 function Router() {
   return (
-    <WouterRouter base="/otm-value-driver-library">
+    // 使用 Hash 路由解决 GitHub Pages 刷新 404 和白屏问题
+    // 此时不需要设置 base 路径，因为 hash 会自动拼接在当前 URL 后面
+    <WouterRouter hook={useHashLocation}>
       <Switch>
         <Route path="/client-brief" component={ClientBriefV2} />
         <Route path="/client-brief-classic" component={ClientValidationBrief} />

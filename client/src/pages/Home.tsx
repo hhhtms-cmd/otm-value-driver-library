@@ -73,7 +73,20 @@ export default function Home() {
 
   return (
     <div className="archive-shell">
-      <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />One Oracle Decision Archive · Your OTM Exploration</span><div className="top-ledger-tools"><a href="/otm-value-driver-library/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>Evidence before assertion</span></div></div>
+      <div className="top-ledger">
+        <span className="ledger-identity">
+          <img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />
+          One Oracle Decision Archive · Your OTM Exploration
+        </span>
+        <div className="top-ledger-tools">
+          {/* Modified: Use #/client-brief for hash routing compatibility */}
+          <a href="#/client-brief">
+            {language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}
+          </a>
+          <LanguageSwitcher />
+          <span>Evidence before assertion</span>
+        </div>
+      </div>
       <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
         <div className="brand-block">
           <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />
@@ -97,7 +110,15 @@ export default function Home() {
             <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
             <p className="hero-copy">{language === "zh" ? "先从运输计划与装载优化（Shipment Optimization）开始：用你的订单、路线、运力和服务约束，弄清哪里可以计划得更满、更准、更少临时改动；再按需要探索费用完整性与可视化。" : language === "es" ? "Empiece por Optimización de envíos y cargas (Shipment Optimization): use sus pedidos, rutas, capacidad y restricciones de servicio para aclarar dónde puede planificar cargas más completas, mejores decisiones y menos cambios; después explore integridad de gasto y visibilidad según sea necesario." : "Start with Shipment Optimization: use your orders, routes, capacity, and service constraints to clarify where you can plan fuller loads, make better decisions, and reduce plan changes; then explore spend integrity and visibility as needed."}</p>
             <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><b>01</b><span>{t("能力")}</span><b>02</b><span>{t("变量")}</span><b>03</b><span>KPI</span><b>04</b><span>{t("价值")}</span></div>
-            <div className="hero-actions"><a className="button-archive" href="#assessment-runway">{language === "zh" ? "开始我的探索" : language === "es" ? "Iniciar mi exploración" : "Start my exploration"} <span>↓</span></a><a className="button-archive ghost" href="#library">{language === "zh" ? "浏览价值档案" : language === "es" ? "Explorar la biblioteca" : "Explore the library"} <span>↗</span></a></div>
+            <div className="hero-actions">
+              {/* Modified: Added e.preventDefault() to prevent anchor links from messing up Wouter Hash routing */}
+              <a className="button-archive" href="#assessment-runway" onClick={(e) => { e.preventDefault(); scrollToId("assessment-runway"); }}>
+                {language === "zh" ? "开始我的探索" : language === "es" ? "Iniciar mi exploración" : "Start my exploration"} <span>↓</span>
+              </a>
+              <a className="button-archive ghost" href="#library" onClick={(e) => { e.preventDefault(); scrollToId("library"); }}>
+                {language === "zh" ? "浏览价值档案" : language === "es" ? "Explorar la biblioteca" : "Explore the library"} <span>↗</span>
+              </a>
+            </div>
             <div className="hero-runway-launch" aria-label={language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}>
               <div className="hero-runway-launch-head"><span>START HERE / ASSESSMENT RUNWAY</span><b>{language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}</b></div>
               <div className="hero-runway-launch-options">

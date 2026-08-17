@@ -176,3 +176,7 @@
 .sidebar-rail { display: none; }.page-main { margin-left: 0; }.hero-content { width: min(100%,1100px); margin: 0 auto; }.hero { min-height: 600px; }.hero h1 { max-width: 780px; }.hero-copy { max-width: 660px; }
 @media (max-width: 760px) { .hero { min-height: 570px; }.hero-content { width: auto; margin: 0; } }
 @media (max-width: 760px) { .hero h1 { font-size: 46px; line-height: .98; letter-spacing: -.055em; } }
+
+/* Customer explanation layer: show what the status means instead of exposing internal evidence codes. */
+.roi-driver-name { grid-template-columns: minmax(0,1fr); }.roi-status-explainer { display: grid; gap: 3px; margin-top: 7px; border-left: 2px solid #c6a36a; background: rgba(198,163,106,.08); padding: 6px 8px; color: #5b625e; font-size: 9px; line-height: 1.5; }.roi-status-explainer.confirmed { border-left-color: #365c56; background: rgba(54,92,86,.09); }.roi-status-explainer.directional { border-left-color: #536579; background: rgba(83,101,121,.09); }.roi-status-explainer > b { color: #202a35; font-family: "IBM Plex Mono",monospace; font-size: 8px; letter-spacing: .04em; }.roi-status-explainer span { display: block; }.roi-status-explainer span strong { display: inline; font-family: "IBM Plex Mono",monospace; font-size: 8px; font-weight: 600; }.roi-summary-panel::before,.roi-selection-panel::before { display: none; }
+@media (max-width: 760px) { .roi-driver-row.checked { grid-template-columns: 27px minmax(0,1fr); }.roi-value-field { grid-column: 2; }.roi-status-explainer { font-size: 10px; } }

@@ -41,49 +41,13 @@ const numericValue = (value: unknown) => {
   const parsed = Number(cleaned);
   return Number.isFinite(parsed) ? parsed : null;
 };
-const normalizeCurrencyInput = (value: string) => {
-  const safe = value.replace(/[^\d.]/g, "");
-  const [integer = "", ...decimals] = safe.split(".");
-  const normalizedInteger = integer.replace(/^0+(?=\d)/, "") || "0";
-  const decimal = decimals.join("").slice(0, 2);
-  return decimals.length ? `${normalizedInteger}.${decimal}` : normalizedInteger;
-};
 const fieldKey = (row: Record<string, unknown>, aliases: string[]) => Object.keys(row).find((key) => aliases.some((alias) => normalizeText(key) === normalizeText(alias)));
 const SCENARIO_STORAGE_KEY = "otm-value-driver-library.roi-scenarios.v1";
 const LAYER_COPY: Record<Language, { baseBenefit: string; opportunityBenefit: string; baseRoi: string; notReady: string; included: string; excluded: string; selectedCopy: string; disclaimer: string }> = {
-  zh: { baseBenefit: "已有资料可确认的价值", opportunityBenefit: "还待确认的机会", baseRoi: "基于已确认资料的首年 ROI", notReady: "还需要补一项数据", included: "已有数据可以确认", excluded: "还需要补一项数据", selectedCopy: "只有已有资料可以确认的价值进入 ROI；其余先保留为讨论机会。", disclaimer: "此工具把已确认资料与待确认机会分开显示。对外讨论 ROI 前，仍须确认范围、币种、成本和可能重复计算的影响。" },
-  en: { baseBenefit: "Benefit supported by confirmed information", opportunityBenefit: "Opportunity still to confirm", baseRoi: "First-year ROI from confirmed information", notReady: "One more data point is needed", included: "Information can confirm this", excluded: "One more data point is needed", selectedCopy: "Only value supported by confirmed information enters ROI; other items remain discussion opportunities.", disclaimer: "This workspace separates confirmed information from opportunities still to confirm. Confirm scope, currency, cost, and possible overlap before external ROI discussion." },
-  es: { baseBenefit: "Valor confirmado por información", opportunityBenefit: "Oportunidad pendiente de confirmar", baseRoi: "ROI del primer año con información confirmada", notReady: "Hace falta un dato más", included: "La información permite confirmarlo", excluded: "Hace falta un dato más", selectedCopy: "Solo el valor confirmado por información entra en ROI; los demás elementos quedan como oportunidades de conversación.", disclaimer: "Este espacio separa información confirmada de oportunidades pendientes. Confirme alcance, moneda, coste y posible solapamiento antes de discutir ROI externamente." },
+  zh: { baseBenefit: "Base ROI 合格价值", opportunityBenefit: "待验证机会价值", baseRoi: "Base 首年 ROI", notReady: "证据不足，ROI 未就绪", included: "进入 Base ROI", excluded: "仅机会范围", selectedCopy: "E2/E3 driver 计入 Base ROI；E0/E1 仅作为机会范围。", disclaimer: "此工具将 E0/E1 保留为机会范围，仅将 E2/E3 计入 Base ROI。对外承诺前仍须确认范围、币种、TCO 与去重归属。" },
+  en: { baseBenefit: "Base ROI eligible benefit", opportunityBenefit: "Evidence-pending opportunity", baseRoi: "Base first-year ROI", notReady: "Evidence gate pending", included: "Base ROI included", excluded: "Opportunity only", selectedCopy: "Only E2/E3 drivers enter Base ROI; E0/E1 remain opportunity-only.", disclaimer: "This workspace keeps E0/E1 in the opportunity range and includes only E2/E3 in Base ROI. Confirm scope, currency, TCO, and overlap ownership before external commitment." },
+  es: { baseBenefit: "Beneficio elegible para ROI base", opportunityBenefit: "Oportunidad pendiente de evidencia", baseRoi: "ROI base del primer año", notReady: "Puerta de evidencia pendiente", included: "Incluido en ROI base", excluded: "Solo oportunidad", selectedCopy: "Solo drivers E2/E3 entran en ROI base; E0/E1 permanecen solo como oportunidad.", disclaimer: "Este espacio mantiene E0/E1 en el rango de oportunidad e incluye solo E2/E3 en ROI base. Confirme alcance, moneda, TCO y propiedad de solapamiento antes de un compromiso externo." },
 };
-
-type CustomerEvidenceStatus = { label: string; reason: string; missing: string; next: string; tone: "confirmed" | "needs-data" | "directional" };
-const CUSTOMER_EVIDENCE: Record<Language, Record<EvidenceGate, CustomerEvidenceStatus>> = {
-  zh: {
-    E0: { label: "先作为讨论方向", reason: "目前已看见可能改善的方向，但还没有客户资料可以验证。", missing: "一个真实运输案例或基础数字。", next: "带一个最近案例，与业务同事确认实际影响。", tone: "directional" },
-    E1: { label: "还需要补一项数据", reason: "已经知道这项工作怎样影响业务，但基线资料还不完整。", missing: "一项可核对的基线数据，例如运费、订单、里程碑或处理时间。", next: "确认最了解这项资料的同事，并拿到一段可核对的样本。", tone: "needs-data" },
-    E2: { label: "已有数据可以确认", reason: "已有范围、基线和资料来源，可以把价值假设带进 ROI 讨论。", missing: "继续确认成本、币种和可能重复计算的影响。", next: "复核输入金额，并与相关团队确认适用范围。", tone: "confirmed" },
-    E3: { label: "已有结果可以确认", reason: "不仅有基线资料，也已有运营结果可以回看。", missing: "继续确认结果是否能持续，以及是否与其他改善重复计算。", next: "把已实现结果与团队复核，并记录长期追踪方式。", tone: "confirmed" },
-  },
-  en: {
-    E0: { label: "Keep as a discussion direction", reason: "A possible improvement is visible, but there is no customer information to confirm it yet.", missing: "One real transport example or a baseline number.", next: "Bring one recent example and confirm the practical impact with a business colleague.", tone: "directional" },
-    E1: { label: "One more data point is needed", reason: "You can see how this affects the business, but baseline information is incomplete.", missing: "One checkable baseline such as freight spend, orders, milestones, or handling time.", next: "Confirm the colleague closest to this information and obtain a reviewable sample.", tone: "needs-data" },
-    E2: { label: "Information can confirm this", reason: "Scope, baseline, and information source are available, so the assumption can enter an ROI discussion.", missing: "Continue confirming cost, currency, and possible overlap.", next: "Review the entered value and confirm the applicable scope with the relevant team.", tone: "confirmed" },
-    E3: { label: "Results can be confirmed", reason: "There is a baseline and operating results that can be reviewed.", missing: "Confirm that results can continue and are not counted with another improvement.", next: "Review realised results with the team and record how they will be tracked over time.", tone: "confirmed" },
-  },
-  es: {
-    E0: { label: "Mantener como dirección de conversación", reason: "Se ve una posible mejora, pero aún no hay información del cliente para confirmarla.", missing: "Un ejemplo real de transporte o un dato de línea base.", next: "Lleve un ejemplo reciente y confirme el impacto práctico con un colega de negocio.", tone: "directional" },
-    E1: { label: "Hace falta un dato más", reason: "Se entiende cómo afecta al negocio, pero la información base está incompleta.", missing: "Una línea base verificable, como gasto de flete, pedidos, hitos o tiempo de gestión.", next: "Confirme la persona más cercana a esta información y obtenga una muestra revisable.", tone: "needs-data" },
-    E2: { label: "La información permite confirmarlo", reason: "El alcance, la línea base y la fuente de información están disponibles, por lo que el supuesto puede entrar en una conversación ROI.", missing: "Siga confirmando coste, moneda y posible solapamiento.", next: "Revise el valor introducido y confirme el alcance aplicable con el equipo relevante.", tone: "confirmed" },
-    E3: { label: "Los resultados pueden confirmarse", reason: "Hay una línea base y resultados operativos que se pueden revisar.", missing: "Confirme que los resultados pueden mantenerse y no se cuentan con otra mejora.", next: "Revise los resultados logrados con el equipo y registre cómo se seguirán en el tiempo.", tone: "confirmed" },
-  },
-};
-
-const STATUS_FIELD_LABELS: Record<Language, { reason: string; missing: string; next: string }> = {
-  zh: { reason: "为什么：", missing: "还缺什么：", next: "下一步：" },
-  en: { reason: "Why: ", missing: "Still needed: ", next: "Next step: " },
-  es: { reason: "Por qué: ", missing: "Aún falta: ", next: "Siguiente paso: " },
-};
-
 const readStoredScenarios = (): RoiScenario[] => {
   if (typeof window === "undefined") return [];
   try {
@@ -125,7 +89,6 @@ export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceG
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedDrivers = useMemo(() => drivers.filter((driver) => selectedIds.includes(driver.id)), [drivers, selectedIds]);
-  const selectedCountLabel = language === "zh" ? `已选择 ${selectedDrivers.length} 项` : language === "es" ? `${selectedDrivers.length} seleccionados` : `${selectedDrivers.length} selected`;
   const baseDrivers = useMemo(() => selectedDrivers.filter((driver) => isHardRoiGate(evidenceGates[driver.id])), [selectedDrivers, evidenceGates]);
   const selectedByFamily = useMemo(() => ({ OTM: selectedDrivers.filter((driver) => driver.family === "OTM"), GTM: selectedDrivers.filter((driver) => driver.family === "GTM") }), [selectedDrivers]);
   const potentialOverlap = selectedIds.includes("05") && selectedIds.includes("GTM-02");
@@ -384,46 +347,44 @@ export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceG
 
   return (
     <section className="roi-export-section section-wrap section-anchor" id="roi-export">
-      <div className="section-lead"><div><div className="eyebrow">{language === "zh" ? "价值讨论与 ROI" : language === "es" ? "Discusión de valor y ROI" : "Value discussion and ROI"}</div><h2 className="section-heading">{c.title}</h2></div><p className="section-intro">{c.intro}</p></div>
+      <div className="section-lead"><div><div className="eyebrow">04 / ROI export workspace</div><h2 className="section-heading">{c.title}</h2></div><p className="section-intro">{c.intro}</p></div>
       <div className="roi-import-dossier">
-        <div className="roi-import-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>{c.importLabel}</span></div><h3>{c.importTitle}</h3><p>{c.importCopy}</p></div>
+        <div className="roi-import-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00 / {c.importLabel}</span></div><h3>{c.importTitle}</h3><p>{c.importCopy}</p></div>
         <div className="roi-import-actions"><input ref={fileInputRef} id="baseline-upload" className="roi-file-input" type="file" accept=".xlsx,.xls,.csv" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBaseline(file); }} /><label className="roi-import-button primary" htmlFor="baseline-upload"><span>IMPORT</span>{c.choose} <i>↑</i></label><button className="roi-import-button" onClick={downloadTemplate}><span>TEMPLATE</span>{c.template} <i>↓</i></button></div>
         {importReport && <div className="roi-import-report"><div><b>{c.review}</b><span>{importReport.filename}</span></div><p><strong>{importReport.matchedDriverIds.length}</strong> {c.prefilled}{importReport.updatedCosts.length ? ` · ${c.saved}` : ""}.</p>{importReport.warnings.map((warning) => <small key={warning}>{warning}</small>)}</div>}
       </div>
       <div className="roi-scenario-dossier">
-        <div className="roi-scenario-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>{c.compareLabel}</span></div><h3>{c.scenarioTitle}</h3><p>{c.scenarioCopy}</p></div>
+        <div className="roi-scenario-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00.1 / {c.compareLabel}</span></div><h3>{c.scenarioTitle}</h3><p>{c.scenarioCopy}</p></div>
         <div className="roi-scenario-form"><label><span>{c.scenarioName}</span><input value={scenarioName} onChange={(event) => setScenarioName(event.target.value)} placeholder={c.placeholder} /></label>{activeScenario && <button className="roi-import-button" onClick={startNewScenario}><span>NEW</span>{c.new} <i>↗</i></button>}<button className="roi-import-button primary" onClick={saveScenario}><span>{activeScenario ? "UPDATE" : "SAVE"}</span>{activeScenario ? c.update : c.save} <i>+</i></button></div>
         {scenarioComparison.length > 0 ? <div className="roi-comparison-grid"><div className="roi-comparison-heading"><span>{c.register}</span><b>{number.format(scenarioComparison.length).padStart(2, "0")} {c.saved}</b></div>{scenarioComparison.map(({ scenario, benefit, firstYear, roi: scenarioRoi, payback }) => <article className={`roi-scenario-card ${activeScenarioId === scenario.id ? "active" : ""}`} key={scenario.id}><div className="scenario-card-top"><div><span>SCENARIO / {formatScenarioStamp(scenario.savedAt)}</span><h4>{scenario.name}</h4></div><i>{activeScenarioId === scenario.id ? c.current : c.saved}</i></div><div className="scenario-card-metrics"><div><span>{c.benefit}</span><strong>{currency.format(benefit)}</strong></div><div><span>{c.roi}</span><strong>{scenarioRoi.toFixed(1)}%</strong></div><div><span>{c.payback}</span><strong>{payback ? `${payback.toFixed(1)} ${c.months}` : "—"}</strong></div></div><p>{c.firstYear} {currency.format(firstYear)} · {scenario.selectedIds.length} {c.drivers}</p><div className="scenario-card-actions"><button onClick={() => loadScenario(scenario)}>{c.load}</button><button onClick={() => removeScenario(scenario)}>{c.delete}</button></div></article>)}</div> : <div className="roi-empty-scenario"><span>SCENARIO REGISTER / EMPTY</span><p>{c.empty}</p></div>}
       </div>
       <div className="roi-workspace">
         <div className="roi-selection-panel">
-          <div className="roi-panel-heading"><div><span>{c.selectLabel}</span><h3>{c.select}</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedCountLabel}</b></div></div>
+          <div className="roi-panel-heading"><div><span>01 / {c.selectLabel}</span><h3>{c.select}</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedDrivers.length.toString().padStart(2, "0")} / {drivers.length.toString().padStart(2, "0")}</b></div></div>
           <p className="roi-panel-copy">{c.selectCopy}</p>
           <div className="roi-driver-list">
             {drivers.map((driver) => {
               const checked = selectedIds.includes(driver.id);
-              const evidence = CUSTOMER_EVIDENCE[language][evidenceGates[driver.id] ?? "E0"];
               return <div className={`roi-driver-row ${driver.status} ${driver.family.toLowerCase()} ${checked ? "checked" : ""}`} key={driver.id}>
                 <button className="roi-check" onClick={() => toggleDriver(driver.id)} aria-pressed={checked} aria-label={`${c.select} ${driver.title}`}><span>{checked ? "✓" : ""}</span></button>
-                <div className="roi-driver-name"><div><strong><i className={`roi-family-chip ${driver.family.toLowerCase()}`}>{driver.family}</i>{driver.title}</strong><div className={`roi-status-explainer ${evidence.tone}`}><b>{evidence.label}</b><span><strong>{STATUS_FIELD_LABELS[language].reason}</strong>{evidence.reason}</span><span><strong>{STATUS_FIELD_LABELS[language].missing}</strong>{evidence.missing}</span><span><strong>{STATUS_FIELD_LABELS[language].next}</strong>{evidence.next}</span></div></div></div>
-                {checked && <label className="roi-value-field"><span>{c.annualValue}</span><input type="text" inputMode="decimal" value={driverValues[driver.id] ?? 0} onChange={(event) => setDriverValue(driver.id, Number(normalizeCurrencyInput(event.target.value)))} /><em>{currency.format(safeValue(driverValues[driver.id] ?? 0))}</em></label>}
+                <div className="roi-driver-name"><b>{driver.id}</b><div><strong><i className={`roi-family-chip ${driver.family.toLowerCase()}`}>{driver.family}</i>{driver.title}</strong><small><b className={`roi-evidence-gate ${isHardRoiGate(evidenceGates[driver.id]) ? "included" : "excluded"}`}>{evidenceGates[driver.id] ?? "E0"} · {isHardRoiGate(evidenceGates[driver.id]) ? layer.included : layer.excluded}</b>{driver.statusLabel} · {driver.impact}</small></div></div>
+                {checked && <label className="roi-value-field"><span>{c.annualValue}</span><input type="number" min="0" step="1000" value={driverValues[driver.id] ?? 0} onChange={(event) => setDriverValue(driver.id, Number(event.target.value))} /><em>{currency.format(safeValue(driverValues[driver.id] ?? 0))}</em></label>}
               </div>;
             })}
           </div>
         </div>
         <div className="roi-summary-panel">
-          <div className="roi-panel-heading"><div><span>{c.calculateLabel}</span><h3>{c.calculation}</h3></div><div className="roi-heading-mark inverse"><img src={brandMarkSrc} alt="" /><b>USD</b></div></div>
-          <div className="roi-summary-content">
-            <div className="roi-summary-primary">
-              <div className="roi-total-card"><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong><small>{c.selectedBenefit}</small></div>
-              <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{layer.baseRoi}</span><strong>{roi === null ? layer.notReady : `${roi.toFixed(1)}%`}</strong></div></div>
-              <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(baseNetAnnualBenefit)}</small></div>
-            </div>
-            <div className="roi-summary-context">
-              <div className="roi-gate-ledger"><div><span>{layer.baseBenefit}</span><strong>{currency.format(baseBenefit)}</strong><small>{baseDrivers.length} {c.drivers} · {layer.included}</small></div><div><span>{layer.opportunityBenefit}</span><strong>{currency.format(opportunityBenefit)}</strong><small>{selectedDrivers.length - baseDrivers.length} {c.drivers} · {layer.excluded}</small></div></div>
-              <div className="roi-summary-controls"><div className="roi-input-grid"><label><span>{c.implementation}</span><input type="text" inputMode="decimal" value={implementationCost} onChange={(event) => setImplementationCost(safeValue(Number(normalizeCurrencyInput(event.target.value))))} /><em>{currency.format(implementationCost)}</em></label><label><span>{c.runCost}</span><input type="text" inputMode="decimal" value={annualRunCost} onChange={(event) => setAnnualRunCost(safeValue(Number(normalizeCurrencyInput(event.target.value))))} /><em>{currency.format(annualRunCost)}</em></label></div><div className="roi-formula"><b>{language === "zh" ? "ROI 如何计算" : language === "es" ? "Cómo se calcula el ROI" : "How ROI is calculated"}</b><span>{c.formula}</span></div><div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div></div>
-            </div>
+          <div className="roi-panel-heading"><div><span>02 / {c.calculateLabel}</span><h3>{c.calculation}</h3></div><div className="roi-heading-mark inverse"><img src={brandMarkSrc} alt="" /><b>USD</b></div></div>
+          <div className="roi-input-grid">
+            <label><span>{c.implementation}</span><input type="number" min="0" step="1000" value={implementationCost} onChange={(event) => setImplementationCost(safeValue(Number(event.target.value)))} /><em>{currency.format(implementationCost)}</em></label>
+            <label><span>{c.runCost}</span><input type="number" min="0" step="1000" value={annualRunCost} onChange={(event) => setAnnualRunCost(safeValue(Number(event.target.value)))} /><em>{currency.format(annualRunCost)}</em></label>
           </div>
+          <div className="roi-total-card"><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong><small>{c.selectedBenefit}</small></div>
+          <div className="roi-gate-ledger"><div><span>{layer.baseBenefit}</span><strong>{currency.format(baseBenefit)}</strong><small>{baseDrivers.length} {c.drivers} · E2/E3</small></div><div><span>{layer.opportunityBenefit}</span><strong>{currency.format(opportunityBenefit)}</strong><small>{selectedDrivers.length - baseDrivers.length} {c.drivers} · E0/E1</small></div></div>
+          <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{layer.baseRoi}</span><strong>{roi === null ? layer.notReady : `${roi.toFixed(1)}%`}</strong></div></div>
+          <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(baseNetAnnualBenefit)}</small></div>
+          <div className="roi-formula"><b>Formula / First-year ROI</b><span>{c.formula}</span></div>
+          <div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div>
           <div className="roi-export-actions"><ExecutivePptExport language={language} baseDrivers={baseDrivers} opportunityDrivers={selectedDrivers.filter((driver) => !isHardRoiGate(evidenceGates[driver.id]))} baseBenefit={baseBenefit} opportunityBenefit={opportunityBenefit} implementationCost={implementationCost} annualRunCost={annualRunCost} firstYearNetBenefit={firstYearNetBenefit} roi={roi} paybackMonths={paybackMonths} overlapAlert={potentialOverlap} reportDate={date} onStatus={updateMessage} /><button onClick={exportPdf} className="roi-export-button pdf"><span>PDF</span>{c.pdf} <i>↓</i></button><button onClick={exportExcel} className="roi-export-button excel"><span>XLSX</span>{c.excel} <i>↓</i></button></div>
           {exportMessage && <p className="roi-export-message" role="status">{exportMessage}</p>}
         </div>

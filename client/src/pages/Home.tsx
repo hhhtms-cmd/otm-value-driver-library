@@ -25,6 +25,47 @@ const HERO_CUSTOMER_COPY = {
   es: { top: "Su exploración de transporte", brandSub: "De la pregunta al siguiente paso", decision: "Qué hacer después", scope: "Transporte y comercio", meta: "Empiece con su pregunta operativa", captionLeft: "Lo que puede aclarar", captionRight: "Problema → mejora posible → valor por confirmar", startHere: "Empiece con una pregunta", fullToolkit: "Ver el kit completo" },
 } as const;
 
+type CustomerOutcome = { icon: string; path: RunwayPath; title: string; copy: string };
+type CustomerDiscoveryCopy = { eyebrow: string; title: string; intro: string; decisions: string[]; outcomeEyebrow: string; outcomeTitle: string; outcomeIntro: string; outcomes: CustomerOutcome[] };
+const CUSTOMER_DISCOVERY: Record<Language, CustomerDiscoveryCopy> = {
+  zh: {
+    eyebrow: "OTM 能帮你决定什么？", title: "把运输中的每一个决定，变得更清楚。", intro: "OTM 帮助你计划、执行、追踪和优化运输。它让团队能更好地决定什么该运、何时运、怎样运、由谁运，以及发生问题时该怎么做。", decisions: ["哪些订单可以一起运？", "哪条路线和服务更合适？", "该选哪家承运商、花多少钱？", "延误发生时，谁该先行动？"], outcomeEyebrow: "你想改善什么？", outcomeTitle: "先选一个最接近你现状的问题。", outcomeIntro: "不需要知道 OTM 的术语。选择一个业务问题后，我们会说明 OTM 怎样帮助、可能改善什么，以及下一步需要确认什么。", outcomes: [
+      { icon: "￥", path: "audit", title: "降低运输成本", copy: "我的运费是不是越付越多？" },
+      { icon: "↗", path: "optimization", title: "更好地安排运输", copy: "订单、路线和装载能不能安排得更好？" },
+      { icon: "◎", path: "audit", title: "改善承运商表现", copy: "费率、运力和服务是否真的匹配？" },
+      { icon: "◷", path: "visibility", title: "提高准时交付", copy: "延误和加急是不是太多？" },
+      { icon: "◉", path: "visibility", title: "看清运输状态", copy: "我们是否知道货物在哪里、问题何时发生？" },
+      { icon: "◇", path: "broader", title: "减少人工工作", copy: "团队是否花太多时间追踪、核对和沟通？" },
+      { icon: "⌁", path: "broader", title: "优化车队或网络", copy: "车辆、设备或运输网络是否被充分利用？" },
+      { icon: "?", path: "broader", title: "我还有其他问题", copy: "先说清你想改善什么，我们会帮你找到方向。" },
+    ]
+  },
+  en: {
+    eyebrow: "What can OTM help you decide?", title: "Make every transport decision clearer.", intro: "OTM helps you plan, execute, track, and optimise transportation. It helps your team decide what to move, when and how to move it, who should move it, and what to do when something goes wrong.", decisions: ["Which orders can move together?", "Which route and service fit best?", "Which carrier should move it, and at what cost?", "When a delay happens, who should act first?"], outcomeEyebrow: "What would you like to improve?", outcomeTitle: "Choose the issue closest to your situation.", outcomeIntro: "You do not need to know OTM terminology. Choose a business issue and we will show how OTM can help, what could improve, and what to confirm next.", outcomes: [
+      { icon: "$", path: "audit", title: "Reduce transportation cost", copy: "Are we paying more freight than we should?" },
+      { icon: "↗", path: "optimization", title: "Plan shipments better", copy: "Can orders, routes, and loads be planned better?" },
+      { icon: "◎", path: "audit", title: "Improve carrier performance", copy: "Do rates, capacity, and service really match?" },
+      { icon: "◷", path: "visibility", title: "Improve on-time delivery", copy: "Are delays and expedites happening too often?" },
+      { icon: "◉", path: "visibility", title: "Improve shipment visibility", copy: "Do we know where shipments are and when problems happen?" },
+      { icon: "◇", path: "broader", title: "Reduce manual work", copy: "Does the team spend too much time chasing, checking, and communicating?" },
+      { icon: "⌁", path: "broader", title: "Improve fleet or network use", copy: "Are vehicles, equipment, or the transport network fully used?" },
+      { icon: "?", path: "broader", title: "I have another question", copy: "Tell us what you want to improve and we will help you find a direction." },
+    ]
+  },
+  es: {
+    eyebrow: "¿Qué puede ayudarle a decidir OTM?", title: "Haga más clara cada decisión de transporte.", intro: "OTM le ayuda a planificar, ejecutar, seguir y optimizar el transporte. Ayuda a su equipo a decidir qué mover, cuándo y cómo moverlo, quién debe moverlo y qué hacer cuando algo sale mal.", decisions: ["¿Qué pedidos pueden viajar juntos?", "¿Qué ruta y servicio encajan mejor?", "¿Qué carrier debe moverlo y a qué coste?", "Cuando hay un retraso, ¿quién debe actuar primero?"], outcomeEyebrow: "¿Qué le gustaría mejorar?", outcomeTitle: "Elija el problema más cercano a su situación.", outcomeIntro: "No necesita conocer terminología OTM. Elija un problema de negocio y mostraremos cómo OTM puede ayudar, qué podría mejorar y qué confirmar después.", outcomes: [
+      { icon: "$", path: "audit", title: "Reducir el coste de transporte", copy: "¿Pagamos más flete de lo necesario?" },
+      { icon: "↗", path: "optimization", title: "Planificar mejor los envíos", copy: "¿Podemos planificar mejor pedidos, rutas y cargas?" },
+      { icon: "◎", path: "audit", title: "Mejorar el desempeño del carrier", copy: "¿Tarifas, capacidad y servicio realmente coinciden?" },
+      { icon: "◷", path: "visibility", title: "Mejorar entregas a tiempo", copy: "¿Los retrasos y urgencias ocurren demasiado?" },
+      { icon: "◉", path: "visibility", title: "Mejorar la visibilidad", copy: "¿Sabemos dónde están los envíos y cuándo ocurren problemas?" },
+      { icon: "◇", path: "broader", title: "Reducir trabajo manual", copy: "¿El equipo dedica demasiado tiempo a perseguir, revisar y comunicar?" },
+      { icon: "⌁", path: "broader", title: "Mejorar uso de flota o red", copy: "¿Vehículos, equipos o red de transporte se usan por completo?" },
+      { icon: "?", path: "broader", title: "Tengo otra pregunta", copy: "Diga qué quiere mejorar y le ayudaremos a encontrar una dirección." },
+    ]
+  },
+};
+
 type ViewKey = "explore" | "assessment" | "discussion";
 type ViewContent = { label: string; code: string; title: string; copy: string; items: [string, string, string][] };
 const VIEWS: Record<Language, Record<ViewKey, ViewContent>> = {
@@ -63,6 +104,7 @@ export default function Home() {
   const selected = useMemo(() => localizedDrivers.find((driver) => driver.id === selectedId) ?? localizedDrivers[0], [localizedDrivers, selectedId]);
   const views = VIEWS[language];
   const view = views[activeView];
+  const customerDiscovery = CUSTOMER_DISCOVERY[language];
 
   const selectDriver = (id: string) => { setSelectedId(id); window.setTimeout(() => scrollToId("driver-detail"), 10); };
   const chooseRunwayPath = (path: RunwayPath) => {
@@ -71,6 +113,7 @@ export default function Home() {
     setSelectedId(driverId);
     setRunwayStage("driver");
   };
+  const chooseCustomerOutcome = (path: RunwayPath) => { chooseRunwayPath(path); window.setTimeout(() => scrollToId("assessment-runway"), 10); };
   const goToRunwayDriver = () => { setRunwayStage("discovery"); scrollToId("driver-detail"); };
   const goToRunwayDiscovery = () => { setRunwayStage("evidence"); scrollToId("discovery-file"); };
   const goToRunwayEvidence = () => { setRunwayStage("evidence"); scrollToId("evidence-gate"); };
@@ -101,21 +144,15 @@ export default function Home() {
             <div className="hero-file-header"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" /><b>{heroCopy.decision}</b><i>{heroCopy.scope}</i></div>
             <div className="hero-meta"><i />{heroCopy.meta}</div>
             <div className="hero-file-caption"><span>{heroCopy.captionLeft}</span><b>{heroCopy.captionRight}</b></div>
-            <h1>{t("从运输信号，建立")}<br /><em>{t("可验证的")}</em>{t("价值档案。")}</h1>
-            <p className="hero-copy">{language === "zh" ? "先从运输计划与装载优化（Shipment Optimization）开始：用你的订单、路线、运力和服务约束，弄清哪里可以计划得更满、更准、更少临时改动；再按需要探索费用完整性与可视化。" : language === "es" ? "Empiece por Optimización de envíos y cargas (Shipment Optimization): use sus pedidos, rutas, capacidad y restricciones de servicio para aclarar dónde puede planificar cargas más completas, mejores decisiones y menos cambios; después explore integridad de gasto y visibilidad según sea necesario." : "Start with Shipment Optimization: use your orders, routes, capacity, and service constraints to clarify where you can plan fuller loads, make better decisions, and reduce plan changes; then explore spend integrity and visibility as needed."}</p>
-            <div className="hero-causal-rail" aria-label="Value causal path"><span>{t("痛点")}</span><i>→</i><span>{t("能力")}</span><i>→</i><span>{t("变量")}</span><i>→</i><span>KPI</span><i>→</i><span>{t("价值")}</span></div>
-            <div className="hero-actions"><a className="button-archive" href="#assessment-runway">{language === "zh" ? "开始我的探索" : language === "es" ? "Iniciar mi exploración" : "Start my exploration"} <span>↓</span></a><a className="button-archive ghost" href="#library">{heroCopy.fullToolkit} <span>↗</span></a></div>
-            <div className="hero-runway-launch" aria-label={heroCopy.startHere}>
-              <div className="hero-runway-launch-head"><span>{heroCopy.startHere}</span><b>{language === "zh" ? "从你的问题开始" : language === "es" ? "Empiece con su pregunta" : "Start with your question"}</b></div>
-              <div className="hero-runway-launch-options">
-                <button onClick={() => { chooseRunwayPath("optimization"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><strong>{language === "zh" ? "订单与装载能否安排得更好？" : language === "es" ? "¿Podemos planificar mejor pedidos y cargas?" : "Can we plan orders and loads better?"}</strong><i>↘</i></button>
-                <button onClick={() => { chooseRunwayPath("audit"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><strong>{language === "zh" ? "我的运费是不是越付越多？" : language === "es" ? "¿Estamos pagando más flete de lo necesario?" : "Are we paying more freight than we should?"}</strong><i>↘</i></button>
-                <button onClick={() => { chooseRunwayPath("visibility"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><strong>{language === "zh" ? "延误时我们能马上行动吗？" : language === "es" ? "¿Podemos actuar apenas ocurre un retraso?" : "Can we act as soon as a delay happens?"}</strong><i>↘</i></button>
-                <button onClick={() => { chooseRunwayPath("broader"); window.setTimeout(() => scrollToId("assessment-runway"), 10); }}><strong>{language === "zh" ? "我的问题不在这里？" : language === "es" ? "¿Su problema no aparece aquí?" : "Is my issue not listed here?"}</strong><i>↘</i></button>
-              </div>
-            </div>
+            <h1>{language === "zh" ? <>OTM 能怎样<br />帮助你的<br /><em>运输业务？</em></> : language === "es" ? <>¿Cómo puede OTM ayudar<br />a su <em>negocio?</em></> : <>How can OTM help<br />your <em>business?</em></>}</h1>
+            <p className="hero-copy">{language === "zh" ? "Oracle Transportation Management 帮助企业计划、执行、追踪和优化运输。它让你更清楚地决定：什么该运、何时运、怎样运、由谁运，以及出现问题时怎么办。" : language === "es" ? "Oracle Transportation Management ayuda a las empresas a planificar, ejecutar, seguir y optimizar el transporte. Aclara qué mover, cuándo y cómo moverlo, quién debe moverlo y qué hacer cuando algo sale mal." : "Oracle Transportation Management helps companies plan, execute, track, and optimise transportation. It clarifies what to move, when and how to move it, who should move it, and what to do when something goes wrong."}</p>
+            <div className="hero-actions"><a className="button-archive" href="#what-is-otm">{language === "zh" ? "看看 OTM 能帮什么" : language === "es" ? "Ver cómo ayuda OTM" : "See how OTM can help"} <span>↓</span></a><a className="button-archive ghost" href="#library">{heroCopy.fullToolkit} <span>↗</span></a></div>
           </div>
         </section>
+
+        <section className="customer-otm-intro section-wrap section-anchor" id="what-is-otm"><div className="customer-otm-lead"><div><div className="eyebrow">{customerDiscovery.eyebrow}</div><h2>{customerDiscovery.title}</h2></div><p>{customerDiscovery.intro}</p></div><div className="customer-decision-list">{customerDiscovery.decisions.map((decision) => <div key={decision}><i>→</i><span>{decision}</span></div>)}</div></section>
+
+        <section className="customer-outcomes section-wrap section-anchor" id="customer-outcomes"><div className="section-lead"><div><div className="eyebrow">{customerDiscovery.outcomeEyebrow}</div><h2 className="section-heading">{customerDiscovery.outcomeTitle}</h2></div><p className="section-intro">{customerDiscovery.outcomeIntro}</p></div><div className="customer-outcome-grid">{customerDiscovery.outcomes.map((outcome) => <button type="button" key={outcome.title} className="customer-outcome-card" onClick={() => chooseCustomerOutcome(outcome.path)}><i>{outcome.icon}</i><h3>{outcome.title}</h3><p>{outcome.copy}</p><span>{language === "zh" ? "看看 OTM 怎样帮助" : language === "es" ? "Ver cómo ayuda OTM" : "See how OTM can help"} <b>→</b></span></button>)}</div></section>
 
         <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onOpenGtmModule={openGtmModule} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
 

@@ -125,6 +125,7 @@ export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceG
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedDrivers = useMemo(() => drivers.filter((driver) => selectedIds.includes(driver.id)), [drivers, selectedIds]);
+  const selectedCountLabel = language === "zh" ? `已选择 ${selectedDrivers.length} 项` : language === "es" ? `${selectedDrivers.length} seleccionados` : `${selectedDrivers.length} selected`;
   const baseDrivers = useMemo(() => selectedDrivers.filter((driver) => isHardRoiGate(evidenceGates[driver.id])), [selectedDrivers, evidenceGates]);
   const selectedByFamily = useMemo(() => ({ OTM: selectedDrivers.filter((driver) => driver.family === "OTM"), GTM: selectedDrivers.filter((driver) => driver.family === "GTM") }), [selectedDrivers]);
   const potentialOverlap = selectedIds.includes("05") && selectedIds.includes("GTM-02");
@@ -383,20 +384,20 @@ export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceG
 
   return (
     <section className="roi-export-section section-wrap section-anchor" id="roi-export">
-      <div className="section-lead"><div><div className="eyebrow">04 / ROI export workspace</div><h2 className="section-heading">{c.title}</h2></div><p className="section-intro">{c.intro}</p></div>
+      <div className="section-lead"><div><div className="eyebrow">{language === "zh" ? "价值讨论与 ROI" : language === "es" ? "Discusión de valor y ROI" : "Value discussion and ROI"}</div><h2 className="section-heading">{c.title}</h2></div><p className="section-intro">{c.intro}</p></div>
       <div className="roi-import-dossier">
-        <div className="roi-import-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00 / {c.importLabel}</span></div><h3>{c.importTitle}</h3><p>{c.importCopy}</p></div>
+        <div className="roi-import-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>{c.importLabel}</span></div><h3>{c.importTitle}</h3><p>{c.importCopy}</p></div>
         <div className="roi-import-actions"><input ref={fileInputRef} id="baseline-upload" className="roi-file-input" type="file" accept=".xlsx,.xls,.csv" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importBaseline(file); }} /><label className="roi-import-button primary" htmlFor="baseline-upload"><span>IMPORT</span>{c.choose} <i>↑</i></label><button className="roi-import-button" onClick={downloadTemplate}><span>TEMPLATE</span>{c.template} <i>↓</i></button></div>
         {importReport && <div className="roi-import-report"><div><b>{c.review}</b><span>{importReport.filename}</span></div><p><strong>{importReport.matchedDriverIds.length}</strong> {c.prefilled}{importReport.updatedCosts.length ? ` · ${c.saved}` : ""}.</p>{importReport.warnings.map((warning) => <small key={warning}>{warning}</small>)}</div>}
       </div>
       <div className="roi-scenario-dossier">
-        <div className="roi-scenario-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>00.1 / {c.compareLabel}</span></div><h3>{c.scenarioTitle}</h3><p>{c.scenarioCopy}</p></div>
+        <div className="roi-scenario-copy"><div className="roi-import-seal"><img src={brandMarkSrc} alt="" /> <span>{c.compareLabel}</span></div><h3>{c.scenarioTitle}</h3><p>{c.scenarioCopy}</p></div>
         <div className="roi-scenario-form"><label><span>{c.scenarioName}</span><input value={scenarioName} onChange={(event) => setScenarioName(event.target.value)} placeholder={c.placeholder} /></label>{activeScenario && <button className="roi-import-button" onClick={startNewScenario}><span>NEW</span>{c.new} <i>↗</i></button>}<button className="roi-import-button primary" onClick={saveScenario}><span>{activeScenario ? "UPDATE" : "SAVE"}</span>{activeScenario ? c.update : c.save} <i>+</i></button></div>
         {scenarioComparison.length > 0 ? <div className="roi-comparison-grid"><div className="roi-comparison-heading"><span>{c.register}</span><b>{number.format(scenarioComparison.length).padStart(2, "0")} {c.saved}</b></div>{scenarioComparison.map(({ scenario, benefit, firstYear, roi: scenarioRoi, payback }) => <article className={`roi-scenario-card ${activeScenarioId === scenario.id ? "active" : ""}`} key={scenario.id}><div className="scenario-card-top"><div><span>SCENARIO / {formatScenarioStamp(scenario.savedAt)}</span><h4>{scenario.name}</h4></div><i>{activeScenarioId === scenario.id ? c.current : c.saved}</i></div><div className="scenario-card-metrics"><div><span>{c.benefit}</span><strong>{currency.format(benefit)}</strong></div><div><span>{c.roi}</span><strong>{scenarioRoi.toFixed(1)}%</strong></div><div><span>{c.payback}</span><strong>{payback ? `${payback.toFixed(1)} ${c.months}` : "—"}</strong></div></div><p>{c.firstYear} {currency.format(firstYear)} · {scenario.selectedIds.length} {c.drivers}</p><div className="scenario-card-actions"><button onClick={() => loadScenario(scenario)}>{c.load}</button><button onClick={() => removeScenario(scenario)}>{c.delete}</button></div></article>)}</div> : <div className="roi-empty-scenario"><span>SCENARIO REGISTER / EMPTY</span><p>{c.empty}</p></div>}
       </div>
       <div className="roi-workspace">
         <div className="roi-selection-panel">
-          <div className="roi-panel-heading"><div><span>{c.selectLabel}</span><h3>{c.select}</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedDrivers.length} / {drivers.length}</b></div></div>
+          <div className="roi-panel-heading"><div><span>{c.selectLabel}</span><h3>{c.select}</h3></div><div className="roi-heading-mark"><img src={brandMarkSrc} alt="" /><b>{selectedCountLabel}</b></div></div>
           <p className="roi-panel-copy">{c.selectCopy}</p>
           <div className="roi-driver-list">
             {drivers.map((driver) => {
@@ -412,16 +413,17 @@ export default function RoiExportWorkspace({ drivers, evidenceGates, onEvidenceG
         </div>
         <div className="roi-summary-panel">
           <div className="roi-panel-heading"><div><span>{c.calculateLabel}</span><h3>{c.calculation}</h3></div><div className="roi-heading-mark inverse"><img src={brandMarkSrc} alt="" /><b>USD</b></div></div>
-          <div className="roi-input-grid">
-            <label><span>{c.implementation}</span><input type="text" inputMode="decimal" value={implementationCost} onChange={(event) => setImplementationCost(safeValue(Number(normalizeCurrencyInput(event.target.value))))} /><em>{currency.format(implementationCost)}</em></label>
-            <label><span>{c.runCost}</span><input type="text" inputMode="decimal" value={annualRunCost} onChange={(event) => setAnnualRunCost(safeValue(Number(normalizeCurrencyInput(event.target.value))))} /><em>{currency.format(annualRunCost)}</em></label>
+          <div className="roi-summary-content">
+            <div className="roi-summary-primary">
+              <div className="roi-total-card"><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong><small>{c.selectedBenefit}</small></div>
+              <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{layer.baseRoi}</span><strong>{roi === null ? layer.notReady : `${roi.toFixed(1)}%`}</strong></div></div>
+              <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(baseNetAnnualBenefit)}</small></div>
+            </div>
+            <div className="roi-summary-context">
+              <div className="roi-gate-ledger"><div><span>{layer.baseBenefit}</span><strong>{currency.format(baseBenefit)}</strong><small>{baseDrivers.length} {c.drivers} · {layer.included}</small></div><div><span>{layer.opportunityBenefit}</span><strong>{currency.format(opportunityBenefit)}</strong><small>{selectedDrivers.length - baseDrivers.length} {c.drivers} · {layer.excluded}</small></div></div>
+              <div className="roi-summary-controls"><div className="roi-input-grid"><label><span>{c.implementation}</span><input type="text" inputMode="decimal" value={implementationCost} onChange={(event) => setImplementationCost(safeValue(Number(normalizeCurrencyInput(event.target.value))))} /><em>{currency.format(implementationCost)}</em></label><label><span>{c.runCost}</span><input type="text" inputMode="decimal" value={annualRunCost} onChange={(event) => setAnnualRunCost(safeValue(Number(normalizeCurrencyInput(event.target.value))))} /><em>{currency.format(annualRunCost)}</em></label></div><div className="roi-formula"><b>{language === "zh" ? "ROI 如何计算" : language === "es" ? "Cómo se calcula el ROI" : "How ROI is calculated"}</b><span>{c.formula}</span></div><div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div></div>
+            </div>
           </div>
-          <div className="roi-total-card"><span>{c.gross}</span><strong>{currency.format(totalBenefit)}</strong><small>{c.selectedBenefit}</small></div>
-          <div className="roi-gate-ledger"><div><span>{layer.baseBenefit}</span><strong>{currency.format(baseBenefit)}</strong><small>{baseDrivers.length} {c.drivers} · {layer.included}</small></div><div><span>{layer.opportunityBenefit}</span><strong>{currency.format(opportunityBenefit)}</strong><small>{selectedDrivers.length - baseDrivers.length} {c.drivers} · {layer.excluded}</small></div></div>
-          <div className="roi-metric-pair"><div><span>{c.firstYear}</span><strong>{currency.format(firstYearNetBenefit)}</strong></div><div><span>{layer.baseRoi}</span><strong>{roi === null ? layer.notReady : `${roi.toFixed(1)}%`}</strong></div></div>
-          <div className="roi-payback"><span>{c.payback}</span><strong>{paybackMonths ? `${paybackMonths.toFixed(1)} ${c.months}` : c.noPayback}</strong><small>{c.netAnnual} {currency.format(baseNetAnnualBenefit)}</small></div>
-          <div className="roi-formula"><b>Formula / First-year ROI</b><span>{c.formula}</span></div>
-          <div className={`roi-overlap-check ${potentialOverlap ? "alert" : ""}`}><b>{c.overlap}</b><span>{potentialOverlap ? c.overlapRisk : `${c.otm}: ${selectedByFamily.OTM.length} · ${c.gtm}: ${selectedByFamily.GTM.length}`}</span></div>
           <div className="roi-export-actions"><ExecutivePptExport language={language} baseDrivers={baseDrivers} opportunityDrivers={selectedDrivers.filter((driver) => !isHardRoiGate(evidenceGates[driver.id]))} baseBenefit={baseBenefit} opportunityBenefit={opportunityBenefit} implementationCost={implementationCost} annualRunCost={annualRunCost} firstYearNetBenefit={firstYearNetBenefit} roi={roi} paybackMonths={paybackMonths} overlapAlert={potentialOverlap} reportDate={date} onStatus={updateMessage} /><button onClick={exportPdf} className="roi-export-button pdf"><span>PDF</span>{c.pdf} <i>↓</i></button><button onClick={exportExcel} className="roi-export-button excel"><span>XLSX</span>{c.excel} <i>↓</i></button></div>
           {exportMessage && <p className="roi-export-message" role="status">{exportMessage}</p>}
         </div>

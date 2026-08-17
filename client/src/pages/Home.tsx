@@ -32,6 +32,31 @@ const HERO_CUSTOMER_COPY = {
   es: { top: "Su exploración de transporte", brandSub: "De la pregunta al siguiente paso", decision: "Qué hacer después", scope: "Transporte y comercio", meta: "Empiece con su pregunta operativa", captionLeft: "Lo que puede aclarar", captionRight: "Problema → mejora posible → valor por confirmar", startHere: "Empiece con una pregunta", fullToolkit: "Ver el kit completo" },
 } as const;
 
+type CustomerNavKey = "start" | "improve" | "fit" | "prepare" | "deeper";
+const CUSTOMER_NAV: Record<Language, Array<{ key: CustomerNavKey; label: string; id: string }>> = {
+  zh: [
+    { key: "start", label: "从这里开始", id: "overview" },
+    { key: "improve", label: "我想改善什么", id: "customer-outcomes" },
+    { key: "fit", label: "适不适合继续了解 OTM？", id: "otm-fit" },
+    { key: "prepare", label: "下一步要准备什么", id: "assessment-runway" },
+    { key: "deeper", label: "深入查看完整工具", id: "library" },
+  ],
+  en: [
+    { key: "start", label: "Start here", id: "overview" },
+    { key: "improve", label: "What I want to improve", id: "customer-outcomes" },
+    { key: "fit", label: "Is OTM worth exploring?", id: "otm-fit" },
+    { key: "prepare", label: "What to prepare next", id: "assessment-runway" },
+    { key: "deeper", label: "Explore the full toolkit", id: "library" },
+  ],
+  es: [
+    { key: "start", label: "Empiece aquí", id: "overview" },
+    { key: "improve", label: "Qué quiero mejorar", id: "customer-outcomes" },
+    { key: "fit", label: "¿Vale la pena explorar OTM?", id: "otm-fit" },
+    { key: "prepare", label: "Qué preparar después", id: "assessment-runway" },
+    { key: "deeper", label: "Explorar el kit completo", id: "library" },
+  ],
+};
+
 type CustomerOutcome = { icon: string; path: RunwayPath; title: string; copy: string };
 type CustomerDiscoveryCopy = { eyebrow: string; title: string; intro: string; decisions: string[]; outcomeEyebrow: string; outcomeTitle: string; outcomeIntro: string; outcomes: CustomerOutcome[] };
 const CUSTOMER_DISCOVERY: Record<Language, CustomerDiscoveryCopy> = {
@@ -101,6 +126,7 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState("01");
   const [familyFilter, setFamilyFilter] = useState<FamilyFilter>("all");
   const [activeView, setActiveView] = useState<ViewKey>("explore");
+  const [activeSection, setActiveSection] = useState<CustomerNavKey>("start");
   const [evidenceGates, setEvidenceGates] = useState<Record<string, EvidenceGate>>(DEFAULT_EVIDENCE_GATES);
   const [runwayPath, setRunwayPath] = useState<RunwayPath | null>(null);
   const [runwayStage, setRunwayStage] = useState<RunwayStage>("problem");
@@ -112,6 +138,7 @@ export default function Home() {
   const views = VIEWS[language];
   const view = views[activeView];
   const customerDiscovery = CUSTOMER_DISCOVERY[language];
+  const customerNav = CUSTOMER_NAV[language];
   const valueStatus = VALUE_STATUS_COPY[language];
 
   const selectDriver = (id: string) => { setSelectedId(id); window.setTimeout(() => scrollToId("driver-detail"), 10); };
@@ -121,7 +148,8 @@ export default function Home() {
     setSelectedId(driverId);
     setRunwayStage("driver");
   };
-  const chooseCustomerOutcome = (path: RunwayPath) => { chooseRunwayPath(path); window.setTimeout(() => scrollToId("assessment-runway"), 10); };
+  const chooseCustomerOutcome = (path: RunwayPath) => { chooseRunwayPath(path); setActiveSection("prepare"); window.setTimeout(() => scrollToId("assessment-runway"), 10); };
+  const goToSection = (key: CustomerNavKey, id: string) => { setActiveSection(key); scrollToId(id); };
   const goToRunwayDriver = () => { setRunwayStage("discovery"); scrollToId("driver-detail"); };
   const goToRunwayDiscovery = () => { setRunwayStage("evidence"); scrollToId("discovery-file"); };
   const goToRunwayEvidence = () => { setRunwayStage("evidence"); scrollToId("evidence-gate"); };
@@ -132,16 +160,16 @@ export default function Home() {
   return (
     <div className="archive-shell">
       <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />{heroCopy.top}</span><div className="top-ledger-tools"><a href="/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>{language === "zh" ? "先看事实，再谈价值" : language === "es" ? "Primero los hechos, luego el valor" : "Facts first, then value"}</span></div></div>
-      <aside className="sidebar-rail" aria-label={t("Value Driver 目录")}>
+      <aside className="sidebar-rail" aria-label={language === "zh" ? "客户探索目录" : language === "es" ? "Índice de exploración del cliente" : "Customer exploration menu"}>
         <div className="brand-block">
           <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />
           <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">{heroCopy.brandSub}</div></div>
         </div>
-        <nav className="rail-nav">
-          <p className="rail-kicker">Value drivers</p>
-          {localizedDrivers.map((driver) => <button key={driver.id} onClick={() => selectDriver(driver.id)} className={`nav-archive-item ${selectedId === driver.id ? "active" : ""}`}><span className="nav-label">{driver.title}</span><i className={`nav-dot ${driver.status}`} /></button>)}
+        <nav className="rail-nav customer-rail-nav">
+          <p className="rail-kicker">{language === "zh" ? "你的探索目录" : language === "es" ? "Su ruta de exploración" : "Your exploration route"}</p>
+          {customerNav.map((item) => <button key={item.key} onClick={() => goToSection(item.key, item.id)} className={`nav-archive-item customer-nav-item ${activeSection === item.key ? "active" : ""}`} aria-current={activeSection === item.key ? "page" : undefined}><span className="nav-label">{item.label}</span><i className="nav-dot customer" /></button>)}
         </nav>
-        <div className="rail-footer"><span>{t("框架原则")}</span><p>{t("价值主张必须可追溯到痛点、能力、经营变量、KPI 与证据状态。")}</p></div>
+        <div className="rail-footer"><span>{language === "zh" ? "怎么使用" : language === "es" ? "Cómo usarlo" : "How to use it"}</span><p>{language === "zh" ? "不需要一次看完。先从一个真实问题开始，再按需要往下看。" : language === "es" ? "No necesita verlo todo ahora. Empiece con un problema real y avance solo cuando lo necesite." : "You do not need to read everything now. Start with one real problem, then go deeper only when useful."}</p></div>
       </aside>
 
       <main className="page-main">

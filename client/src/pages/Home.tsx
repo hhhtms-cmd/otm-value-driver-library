@@ -127,6 +127,7 @@ export default function Home() {
   const [familyFilter, setFamilyFilter] = useState<FamilyFilter>("all");
   const [activeView, setActiveView] = useState<ViewKey>("explore");
   const [activeSection, setActiveSection] = useState<CustomerNavKey>("start");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [evidenceGates, setEvidenceGates] = useState<Record<string, EvidenceGate>>(DEFAULT_EVIDENCE_GATES);
   const [runwayPath, setRunwayPath] = useState<RunwayPath | null>(null);
   const [runwayStage, setRunwayStage] = useState<RunwayStage>("problem");
@@ -149,7 +150,7 @@ export default function Home() {
     setRunwayStage("driver");
   };
   const chooseCustomerOutcome = (path: RunwayPath) => { chooseRunwayPath(path); setActiveSection("prepare"); window.setTimeout(() => scrollToId("assessment-runway"), 10); };
-  const goToSection = (key: CustomerNavKey, id: string) => { setActiveSection(key); scrollToId(id); };
+  const goToSection = (key: CustomerNavKey, id: string) => { setActiveSection(key); setMenuOpen(false); scrollToId(id); };
   const goToRunwayDriver = () => { setRunwayStage("discovery"); scrollToId("driver-detail"); };
   const goToRunwayDiscovery = () => { setRunwayStage("evidence"); scrollToId("discovery-file"); };
   const goToRunwayEvidence = () => { setRunwayStage("evidence"); scrollToId("evidence-gate"); };
@@ -160,7 +161,8 @@ export default function Home() {
   return (
     <div className="archive-shell">
       <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />{heroCopy.top}</span><div className="top-ledger-tools"><a href="/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>{language === "zh" ? "先看事实，再谈价值" : language === "es" ? "Primero los hechos, luego el valor" : "Facts first, then value"}</span></div></div>
-      <aside className="sidebar-rail" aria-label={language === "zh" ? "客户探索目录" : language === "es" ? "Índice de exploración del cliente" : "Customer exploration menu"}>
+      <button type="button" className={`rail-toggle ${menuOpen ? "open" : ""}`} onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="customer-exploration-menu"><span>{menuOpen ? "×" : "☰"}</span>{language === "zh" ? (menuOpen ? "收起目录" : "目录") : language === "es" ? (menuOpen ? "Cerrar menú" : "Menú") : (menuOpen ? "Close menu" : "Menu")}</button>
+      <aside id="customer-exploration-menu" className={`sidebar-rail floating-rail ${menuOpen ? "open" : ""}`} aria-label={language === "zh" ? "客户探索目录" : language === "es" ? "Índice de exploración del cliente" : "Customer exploration menu"}>
         <div className="brand-block">
           <img className="brand-mark" src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="Value Driver Library mark" />
           <div><div className="brand-name">Value Driver<br />Library</div><div className="brand-sub">{heroCopy.brandSub}</div></div>

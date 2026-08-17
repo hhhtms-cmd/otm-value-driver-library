@@ -203,13 +203,18 @@ function vitePluginStorageProxy(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
-const githubRepositoryName = process.env.GITHUB_REPOSITORY?.split("/")[1];
-const githubPagesBase = process.env.GITHUB_ACTIONS && githubRepositoryName ? `/${githubRepositoryName}/` : "/";
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  vitePluginStorageProxy(),
+];
 
 export default defineConfig({
+  base: "/otm-value-driver-library/",
   plugins,
-  base: githubPagesBase,
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -220,7 +225,7 @@ export default defineConfig({
   envDir: path.resolve(import.meta.dirname),
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: "../dist",
     emptyOutDir: true,
   },
   server: {

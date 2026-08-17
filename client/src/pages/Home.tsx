@@ -160,7 +160,10 @@ export default function Home() {
 
   return (
     <div className="archive-shell">
-      <div className="top-ledger"><span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />{heroCopy.top}</span><div className="top-ledger-tools"><a href="/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>{language === "zh" ? "先看事实，再谈价值" : language === "es" ? "Primero los hechos, luego el valor" : "Facts first, then value"}</span></div></div>
+      <div className="top-ledger">
+        <span className="ledger-identity"><img src={assetUrl("/manus-storage/otm-evidence-mark_3295b18f.png")} alt="" />{heroCopy.top}</span>
+        <div className="top-ledger-tools"><a href="#/client-brief">{language === "zh" ? "三分钟快速探索" : language === "es" ? "Exploración rápida" : "Three-minute quick start"}</a><LanguageSwitcher /><span>{language === "zh" ? "先看事实，再谈价值" : language === "es" ? "Primero los hechos, luego el valor" : "Facts first, then value"}</span></div>
+      </div>
       <button type="button" className={`rail-toggle ${menuOpen ? "open" : ""}`} onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="customer-exploration-menu"><span>{menuOpen ? "×" : "☰"}</span>{language === "zh" ? (menuOpen ? "收起目录" : "目录") : language === "es" ? (menuOpen ? "Cerrar menú" : "Menú") : (menuOpen ? "Close menu" : "Menu")}</button>
       <aside id="customer-exploration-menu" className={`sidebar-rail floating-rail ${menuOpen ? "open" : ""}`} aria-label={language === "zh" ? "客户探索目录" : language === "es" ? "Índice de exploración del cliente" : "Customer exploration menu"}>
         <div className="brand-block">
@@ -184,7 +187,7 @@ export default function Home() {
             <div className="hero-file-caption"><span>{heroCopy.captionLeft}</span><b>{heroCopy.captionRight}</b></div>
             <h1>{language === "zh" ? <>OTM 能怎样<br />帮助你的<br /><em>运输业务？</em></> : language === "es" ? <>¿Cómo puede OTM ayudar<br />a su <em>negocio?</em></> : <>How can OTM help<br />your <em>business?</em></>}</h1>
             <p className="hero-copy">{language === "zh" ? "Oracle Transportation Management 帮助企业计划、执行、追踪和优化运输。它让你更清楚地决定：什么该运、何时运、怎样运、由谁运，以及出现问题时怎么办。" : language === "es" ? "Oracle Transportation Management ayuda a las empresas a planificar, ejecutar, seguir y optimizar el transporte. Aclara qué mover, cuándo y cómo moverlo, quién debe moverlo y qué hacer cuando algo sale mal." : "Oracle Transportation Management helps companies plan, execute, track, and optimise transportation. It clarifies what to move, when and how to move it, who should move it, and what to do when something goes wrong."}</p>
-            <div className="hero-actions"><a className="button-archive" href="#what-is-otm">{language === "zh" ? "看看 OTM 能帮什么" : language === "es" ? "Ver cómo ayuda OTM" : "See how OTM can help"} <span>↓</span></a><a className="button-archive ghost" href="#library">{heroCopy.fullToolkit} <span>↗</span></a></div>
+            <div className="hero-actions"><a className="button-archive" href="#what-is-otm" onClick={(event) => { event.preventDefault(); scrollToId("what-is-otm"); }}>{language === "zh" ? "看看 OTM 能帮什么" : language === "es" ? "Ver cómo ayuda OTM" : "See how OTM can help"} <span>↓</span></a><a className="button-archive ghost" href="#library" onClick={(event) => { event.preventDefault(); scrollToId("library"); }}>{heroCopy.fullToolkit} <span>↗</span></a></div>
           </div>
         </section>
 

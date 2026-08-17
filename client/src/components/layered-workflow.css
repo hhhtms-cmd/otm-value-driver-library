@@ -5,6 +5,7 @@
 .simple-next-panel { border-left: 1px solid #d8d0c3; background: #202a35; color: #fffaf2; }
 .simple-label { display: block; color: #d84a36; font-family: "IBM Plex Mono",monospace; font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
 .simple-topic-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.simple-other-topic { border: 1px dashed #c9c0b4; background: transparent; color: #59636d; padding: 8px 10px; font-family: "IBM Plex Mono",monospace; font-size: 9px; letter-spacing: .03em; }.simple-other-topic:hover { border-color: #d84a36; color: #d84a36; }
 .simple-topic-tabs button { border: 1px solid #c9c0b4; background: transparent; color: #59636d; padding: 8px 10px; font-family: "IBM Plex Mono",monospace; font-size: 9px; letter-spacing: .03em; transition: border-color .16s var(--ease-out), background .16s var(--ease-out), color .16s var(--ease-out), transform .16s var(--ease-out); }
 .simple-topic-tabs button:hover { border-color: #d84a36; color: #202a35; }
 .simple-topic-tabs button:active,.simple-answer-grid button:active { transform: scale(.97); }
@@ -28,4 +29,5 @@
 .simple-result h3 { color: #fffaf2; font-size: clamp(25px,2.6vw,34px); }
 .simple-result p { margin: 16px 0 0; border-top: 1px solid rgba(255,250,242,.22); padding-top: 12px; color: #c6c1b9; font-size: 11px; line-height: 1.65; }
 .simple-result button { margin-top: 17px; border: 0; border-bottom: 1px solid #efc7bb; background: transparent; color: #efc7bb; padding: 0 0 4px; font-family: "IBM Plex Mono",monospace; font-size: 8px; letter-spacing: .06em; }
+.simple-result .simple-deeper { display: block; border: 1px solid #d84a36; background: #d84a36; color: #fffaf2; padding: 9px 10px; }
 @media (max-width: 760px) { .simple-workflow { grid-template-columns: 1fr; }.simple-next-panel { border-top: 1px solid #d8d0c3; border-left: 0; }.simple-topic-panel,.simple-next-panel { padding: 24px; }.simple-answer-grid { grid-template-columns: 1fr; }.simple-question h3,.simple-result h3 { font-size: 31px; }.simple-empty,.simple-result { min-height: 175px; } }

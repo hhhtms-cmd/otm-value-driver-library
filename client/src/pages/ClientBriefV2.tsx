@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Clipboard, Download, RotateCcw } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import { OtmFitScale, type OtmFitStage } from "@/components/OtmFitScale";
 import "./ClientBriefV2.css";
 
 type Answer = "yes" | "partial" | "no";
@@ -392,6 +393,7 @@ export default function ClientBriefV2() {
   const resultTitle = resultState === "ready" ? copy.resultTitleReady : resultState === "focus" ? copy.resultTitleFocus : copy.resultTitleClarify;
   const resultBody = resultState === "ready" ? copy.resultBodyReady : resultState === "focus" ? copy.resultBodyFocus : copy.resultBodyClarify;
   const nextMove = resultState === "ready" ? copy.nextReady : resultState === "clarify" ? copy.nextNeed : statuses.foundation !== "ready" ? copy.nextFoundation : copy.nextMobilisation;
+  const fitStage: OtmFitStage = resultState === "ready" ? "assess" : resultState === "focus" ? "explore" : "clarify";
 
   return (
     <main className={`field-guide ${screen !== "start" ? "field-guide-active" : ""}`}>
@@ -470,6 +472,7 @@ export default function ClientBriefV2() {
           <div><div className="field-kicker"><span>{copy.resultKicker}</span><i /></div><h1 id="exploration-map-title">{resultTitle}</h1>{focusOption && <div className="field-result-context"><span>{copy.startingPoint}</span><b>{focusOption.title}</b><p>{focusOption.detail}</p></div>}</div>
           <p>{resultBody}</p>
         </div>
+        <OtmFitScale stage={fitStage} language={language} />
         <div className="signal-map" aria-label={copy.signalKicker}>
           <div className="signal-map-head"><span>{copy.signalKicker}</span><b>{String(readyCount).padStart(2, "0")} / 03</b></div>
           <div className="result-route-line" aria-hidden="true"><svg viewBox="0 0 1000 76" preserveAspectRatio="none"><path d="M28 52 C 190 52, 180 18, 360 22 S 622 62, 688 42 S 810 15, 970 17" /></svg><i /><i /><i /><i /></div>

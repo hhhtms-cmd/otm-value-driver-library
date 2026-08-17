@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import AssessmentWorkflow from "@/components/AssessmentWorkflow";
 import AssessmentRunway, { type RunwayPath, type RunwayStage } from "@/components/AssessmentRunway";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { OtmFitQuickCheck } from "@/components/OtmFitScale";
 import RoiExportWorkspace from "@/components/RoiExportWorkspace";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { DEFAULT_EVIDENCE_GATES, type EvidenceGate } from "@/lib/evidence";
@@ -153,6 +154,8 @@ export default function Home() {
         <section className="customer-otm-intro section-wrap section-anchor" id="what-is-otm"><div className="customer-otm-lead"><div><div className="eyebrow">{customerDiscovery.eyebrow}</div><h2>{customerDiscovery.title}</h2></div><p>{customerDiscovery.intro}</p></div><div className="customer-decision-list">{customerDiscovery.decisions.map((decision) => <div key={decision}><i>→</i><span>{decision}</span></div>)}</div></section>
 
         <section className="customer-outcomes section-wrap section-anchor" id="customer-outcomes"><div className="section-lead"><div><div className="eyebrow">{customerDiscovery.outcomeEyebrow}</div><h2 className="section-heading">{customerDiscovery.outcomeTitle}</h2></div><p className="section-intro">{customerDiscovery.outcomeIntro}</p></div><div className="customer-outcome-grid">{customerDiscovery.outcomes.map((outcome) => <button type="button" key={outcome.title} className="customer-outcome-card" onClick={() => chooseCustomerOutcome(outcome.path)}><i>{outcome.icon}</i><h3>{outcome.title}</h3><p>{outcome.copy}</p><span>{language === "zh" ? "看看 OTM 怎样帮助" : language === "es" ? "Ver cómo ayuda OTM" : "See how OTM can help"} <b>→</b></span></button>)}</div></section>
+
+        <OtmFitQuickCheck />
 
         <AssessmentRunway language={language} path={runwayPath} stage={runwayStage} selectedDriver={selected} evidenceGate={evidenceGates[selectedId] ?? "E0"} onChoosePath={chooseRunwayPath} onOpenGtmModule={openGtmModule} onGoToDriver={goToRunwayDriver} onGoToDiscovery={goToRunwayDiscovery} onGoToEvidence={goToRunwayEvidence} onGoToRoi={goToRunwayRoi} onGoToOutput={goToRunwayOutput} />
 
